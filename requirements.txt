@@ -13,6 +13,7 @@ docker==4.4.4
 email-validator==1.1.2
 Flask==1.1.2
 Flask-RESTful==0.3.8
+gunicorn==20.0.4
 icmplib==2.0.2
 idna==2.10
 itsdangerous==1.1.0
