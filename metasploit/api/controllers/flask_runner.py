@@ -1,4 +1,4 @@
-from metasploit.api.controllers.flask_wrapper import FlaskAppWrapper
+from .flask_wrapper import FlaskAppWrapper
 
 # from metasploit.api.connections import Metasploit
 #
@@ -26,6 +26,5 @@ from metasploit.api.controllers.flask_wrapper import FlaskAppWrapper
 #         print(e)
 
 # print(m.exploits)
-if __name__ == '__main__':
-    FlaskAppWrapper().run(host='0.0.0.0', debug=None)
-    # FlaskAppWrapper().run(host='127.0.0.1', debug=True)
+FlaskAppWrapper().run(host='0.0.0.0', debug=None)
+# FlaskAppWrapper().run(host='127.0.0.1', debug=True)
