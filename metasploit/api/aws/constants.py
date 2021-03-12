@@ -1,15 +1,13 @@
-from metasploit.api.constants import (
-    IP_PROTOCOL,
-    SSH_PORT,
-    CIDR_IP
-)
+import os
+
+from metasploit.api.constants import *
 
 
 DEFAULT_SECURITY_GROUP_ID = 'sg-0cde419d7de10fff7'
 DEFAULT_CPU_TYPE = 't2.micro'
 DEFAULT_IMAGE_ID = 'ami-016b213e65284e9c9'
 DEFAULT_PAIR_KEY_NAME = 'default_key_pair_name'
-DEFAULT_PRIVATE_KEY_PATH = '/home/gafik/MetasploitProject/default_key_pair_name.pem'
+DEFAULT_PRIVATE_KEY_PATH = f'{os.path.abspath(path=os.getcwd())}/default_key_pair_name.pem'
 DEFAULT_MAX_MIN_COUNT = 1
 
 

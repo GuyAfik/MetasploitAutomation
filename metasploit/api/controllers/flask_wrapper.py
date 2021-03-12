@@ -1,4 +1,5 @@
-from flask import Flask, jsonify
+import os
+from flask import Flask
 from flask_restful import Api, request
 
 from metasploit.api.response import (
@@ -109,11 +110,11 @@ class FlaskAppWrapper(object):
         """
         return self._api
 
-    def run(self, host='127.0.0.1', debug=True, threaded=True):
+    def run(self, host='127.0.0.1', debug=True, default_port=5000):
         """
         Run flask app.
         """
-        self.app.run(host=host, debug=debug, threaded=threaded)
+        self.app.run(host=host, debug=debug, port=int(os.environ.get("PORT", default_port)))
 
     def add_all_endpoints(self):
         """
