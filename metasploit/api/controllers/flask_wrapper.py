@@ -1,5 +1,4 @@
 import os
-from flask import Flask
 from flask_restful import Api, request
 
 from metasploit.api.response import (
@@ -28,10 +27,9 @@ class FlaskAppWrapper(object):
     Attributes:
         self._api (FlaskApi) - the api of flask.
     """
-    app = Flask(__name__)
-
-    def __init__(self):
-        self._api = Api(app=FlaskAppWrapper.app)
+    def __init__(self, application):
+        self._api = Api(app=application)
+        self._app = application
         self.add_all_endpoints()
 
     @app.errorhandler(HttpCodes.NOT_FOUND)
@@ -98,12 +96,6 @@ class FlaskAppWrapper(object):
             path=request.base_url
         ).make_response
 
-    def get_app(self):
-        """
-        Get flask app.
-        """
-        return self.app
-
     def get_api(self):
         """
         Get flask API.
@@ -114,7 +106,7 @@ class FlaskAppWrapper(object):
         """
         Run flask app.
         """
-        self.app.run(host=host, debug=debug, port=int(os.environ.get("PORT", default_port)))
+        self._app.run(host=host, debug=debug, port=int(os.environ.get("PORT", default_port)))
 
     def add_all_endpoints(self):
         """
