@@ -276,3 +276,6 @@ class FlaskAppWrapper(object):
             methods=[HttpMethods.DELETE],
             resource_class_kwargs=user_controller_kwargs,
         )
+
+
+flask_wrapper = FlaskAppWrapper(application=app)
