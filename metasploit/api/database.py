@@ -12,9 +12,6 @@ from metasploit.api.errors import (
     InvalidUserNameOrPassword
 )
 
-# db_client = MongoClient(
-#     'mongodb+srv://Metasploit:FVDxbg312@metasploit.gdvxn.mongodb.net/metasploit?retryWrites=true&w=majority'
-# )
 db_client = MongoClient(os.environ.get("MONGO_DB"))
 metasploit_db = db_client['Metasploit']
 
