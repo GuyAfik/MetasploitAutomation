@@ -1,6 +1,7 @@
 import paramiko
 import os
 import io
+import logging
 from paramiko.ssh_exception import (
     SSHException,
     NoValidConnectionsError
@@ -14,6 +15,9 @@ from metasploit.api.errors import (
     SSHConnectionError
 )
 from metasploit.api.aws import constants as aws_const
+
+
+logger = logging.getLogger(name="ConnectionLogger")
 
 
 class Connection(object):
@@ -62,9 +66,11 @@ class SSH(Connection):
                         username=username,
                         pkey=self._private_key
                 ):
+                    logger.info(f"connected {hostname}")
                     is_connection_established = True
                     break
             except (SSHException, NoValidConnectionsError, TimeoutExpiredError) as err:
+                logger.info(f"Failed to connect {hostname}")
                 if isinstance(err, TimeoutExpiredError):
                     raise SSHConnectionError(host=hostname)
 
