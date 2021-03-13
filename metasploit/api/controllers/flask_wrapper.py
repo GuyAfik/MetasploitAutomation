@@ -1,5 +1,6 @@
 import os
 from flask_restful import Api, request
+from flask import Flask
 
 from metasploit.api.response import (
     HttpCodes,
@@ -18,6 +19,9 @@ from metasploit.api.logic.docker_server_service import DockerServerServiceImplem
 from metasploit.api.logic.container_service import ContainerServiceImplementation
 from metasploit.api.logic.metasploit_service import MetasploitServiceImplementation
 from metasploit.api.logic.user_service import UserServiceImplementation
+
+
+app = Flask(__name__)
 
 
 class FlaskAppWrapper(object):
