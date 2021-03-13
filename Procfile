@@ -1,1 +1,1 @@
-web: gunicorn -b :$PORT metasploit.api.controllers.flask_wrapper:app
+web: gunicorn -b :$PORT metasploit:app
