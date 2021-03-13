@@ -106,11 +106,11 @@ class FlaskAppWrapper(object):
         """
         return self._api
 
-    def run(self, host='127.0.0.1', debug=True, default_port=5000):
+    def run(self, host='127.0.0.1', debug=None, default_port=5000, threaded=True):
         """
         Run flask app.
         """
-        self._app.run(host=host, debug=debug, port=int(os.environ.get("PORT", default_port)))
+        self._app.run(host=host, debug=debug, port=int(os.environ.get("PORT", default_port)), threaded=threaded)
 
     def add_all_endpoints(self):
         """
