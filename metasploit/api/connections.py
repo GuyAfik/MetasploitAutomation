@@ -1,7 +1,6 @@
 import paramiko
 import os
 import io
-import logging
 from paramiko.ssh_exception import (
     SSHException,
     NoValidConnectionsError
@@ -15,9 +14,6 @@ from metasploit.api.errors import (
     SSHConnectionError
 )
 from metasploit.api.aws import constants as aws_const
-
-
-logger = logging.getLogger(name="ConnectionLogger")
 
 
 class Connection(object):
@@ -38,9 +34,10 @@ class SSH(Connection):
     """
 
     def __init__(
-            self, hostname,
-            username=aws_const.USER_NAME,
-            private_key=os.environ.get('EC2_KEY_PAIR', aws_const.DEFAULT_PRIVATE_KEY_PATH)
+        self,
+        hostname,
+        username=aws_const.USER_NAME,
+        private_key=str(os.environ.get('EC2_KEY_PAIR', aws_const.DEFAULT_PRIVATE_KEY_PATH))
     ):
         """
         initialize the SSH class with a new connection to a remote machine.
@@ -52,7 +49,9 @@ class SSH(Connection):
         """
         self._ssh_client = paramiko.SSHClient()
         self._ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        self._private_key = paramiko.RSAKey.from_private_key(io.StringIO(private_key))
+        self._private_key = paramiko.RSAKey.from_private_key(
+            file_obj=open(private_key) if private_key == aws_const.DEFAULT_PRIVATE_KEY_PATH else io.StringIO(private_key)
+        )
         self._hostname = hostname
 
         is_connection_established = False
@@ -66,11 +65,9 @@ class SSH(Connection):
                         username=username,
                         pkey=self._private_key
                 ):
-                    logger.info(f"connected {hostname}")
                     is_connection_established = True
                     break
             except (SSHException, NoValidConnectionsError, TimeoutExpiredError) as err:
-                logger.info(f"Failed to connect {hostname}")
                 if isinstance(err, TimeoutExpiredError):
                     raise SSHConnectionError(host=hostname)
 
