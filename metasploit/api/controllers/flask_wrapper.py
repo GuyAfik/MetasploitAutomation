@@ -21,7 +21,7 @@ from metasploit.api.logic.metasploit_service import MetasploitServiceImplementat
 from metasploit.api.logic.user_service import UserServiceImplementation
 
 
-app = Flask(__name__)
+application = Flask(__name__)
 
 
 class FlaskAppWrapper(object):
@@ -31,12 +31,12 @@ class FlaskAppWrapper(object):
     Attributes:
         self._api (FlaskApi) - the api of flask.
     """
-    def __init__(self, application):
-        self._api = Api(app=application)
+    def __init__(self, app):
+        self._api = Api(app=app)
         self._app = application
         self.add_all_endpoints()
 
-    @app.errorhandler(HttpCodes.NOT_FOUND)
+    @application.errorhandler(HttpCodes.NOT_FOUND)
     def invalid_urls_error(self):
         """
         Catches a client request that is not a valid API URL.
@@ -70,7 +70,7 @@ class FlaskAppWrapper(object):
             error_msg=err_msg, http_error_code=HttpCodes.BAD_REQUEST, req=request.json, path=request.base_url
         ).make_response
 
-    @app.errorhandler(HttpCodes.METHOD_NOT_ALLOWED)
+    @application.errorhandler(HttpCodes.METHOD_NOT_ALLOWED)
     def method_not_allowed(self):
         """
         Catches a client request which indicates abut a bad method over a valid API URL.
@@ -85,7 +85,7 @@ class FlaskAppWrapper(object):
             path=request.base_url
         ).make_response
 
-    @app.errorhandler(HttpCodes.BAD_REQUEST)
+    @application.errorhandler(HttpCodes.BAD_REQUEST)
     def bad_request(self):
         """
         Catches a client request which indicates about an invalid data input to the server.
@@ -278,4 +278,4 @@ class FlaskAppWrapper(object):
         )
 
 
-flask_wrapper = FlaskAppWrapper(application=app)
+flask_wrapper = FlaskAppWrapper(app=application)
