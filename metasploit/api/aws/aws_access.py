@@ -35,7 +35,7 @@ class AwsAccess(object):
     def __init__(self):
         # For amit's mac
         # os.environ['AWS_DEFAULT_REGION'] = 'us-west-2'
-        self._client = boto3.client(EC2)
+        self._client = boto3.client(EC2, region_name='us-east-2')
         self._resource = boto3.resource(EC2)
         self._session = boto3.Session()
 
