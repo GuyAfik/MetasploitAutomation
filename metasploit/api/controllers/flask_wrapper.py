@@ -33,7 +33,7 @@ class FlaskAppWrapper(object):
     """
     def __init__(self, app):
         self._api = Api(app=app)
-        self._app = application
+        self._app = app
         self.add_all_endpoints()
 
     @application.errorhandler(HttpCodes.NOT_FOUND)
@@ -106,11 +106,11 @@ class FlaskAppWrapper(object):
         """
         return self._api
 
-    def run(self, debug=None):
+    def run(self, debug=, port=5000):
         """
         Run flask app.
         """
-        self._app.run(debug=debug)
+        self._app.run(debug=debug, port=5000)
 
     def add_all_endpoints(self):
         """
