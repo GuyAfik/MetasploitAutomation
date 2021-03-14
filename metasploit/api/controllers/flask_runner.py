@@ -27,5 +27,5 @@ from .flask_wrapper import flask_wrapper
 
 # print(m.exploits)
 
-flask_wrapper.run()
+flask_wrapper.run(debug=True)
 # FlaskAppWrapper().run(host='127.0.0.1', debug=True)
