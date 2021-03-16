@@ -14,7 +14,7 @@ export function App() {
     return (
         <Router>
             <Switch>
-                <Route path="/login">
+                <Route exact path="/">
                     <LoginPage/>
                 </Route>
                 <div>

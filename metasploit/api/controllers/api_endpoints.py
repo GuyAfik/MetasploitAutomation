@@ -63,6 +63,7 @@ class UserController(ControllerApi):
     def delete(self, username):
         return self._delete_user(username=username)
 
+
     @response_decorator(HttpCodes.OK)
     def _create_user_endpoint(self):
         """
