@@ -12,6 +12,7 @@ from metasploit.api.errors import (
 )
 from requests.adapters import ConnectionError
 from metasploit.api.aws import constants as aws_const
+from metasploit.api.utils.helpers import recover_containers
 
 
 class Docker(Connection):
@@ -35,6 +36,7 @@ class Docker(Connection):
         """
         base_url = f"{protocol}://{docker_server_ip}:{docker_port}"
 
+        is_docker_daemon_recovered = False
         ssh = None
         connection_attempts = 0
         while connection_attempts < 5:
@@ -44,7 +46,8 @@ class Docker(Connection):
                 self._api_client = docker.APIClient(base_url=base_url)
 
                 if self._docker_client.ping():
-                    # TODO - recover all the metasploit containers that are down in case docker daemon dided
+                    if is_docker_daemon_recovered:
+                        recover_containers(containers=self._docker_client.containers.list(all=True))
                     break
             except (ConnectionError, DockerException):
                 if not ssh:
@@ -55,6 +58,7 @@ class Docker(Connection):
                     raise CommandFailureError(cmd=cmd, instance_fqdn=docker_server_ip)
 
                 connection_attempts += 1
+                is_docker_daemon_recovered = True
 
         if connection_attempts >= 5:
             raise DockerServerConnectionError(docker_server=docker_server_ip, url=base_url)

@@ -6,7 +6,8 @@ from metasploit.api.errors import (
     PortNotFoundError,
     DuplicateImageError,
     TimeoutExpiredError,
-    InvalidInputTypeError
+    InvalidInputTypeError,
+    ApiException
 )
 
 
@@ -191,3 +192,29 @@ def remove_trailing_spaces(string):
         string.replace("\n", "")
         return "".join(string.split())
     return ""
+
+
+def recover_containers(containers):
+    """
+    Recovers all the containers of an instance including metasploit msfrpcd.
+
+    Args:
+         containers (list[Container]): a list of container objects.
+
+    Raises:
+        ApiException: in case one of the containers was not able to be recovered.
+    """
+    port = None
+
+    for container in containers:  # start all the containers
+        container.start()
+        container.reload()
+
+        for ports in container.ports.values():
+            for port_configuration in ports:
+                port = port_configuration["HostPort"]
+                if port:
+                    break
+        exit_code, _ = container.exec_run(f"./msfrpcd -P 123456 -S -p {port}")
+        if exit_code:
+            raise ApiException(error_msg=f"Failed recovering container {container.id}", error_code=500)
