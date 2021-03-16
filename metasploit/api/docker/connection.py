@@ -44,6 +44,7 @@ class Docker(Connection):
                 self._api_client = docker.APIClient(base_url=base_url)
 
                 if self._docker_client.ping():
+                    # TODO - recover all the metasploit containers that are down in case docker daemon dided
                     break
             except (ConnectionError, DockerException):
                 if not ssh:
