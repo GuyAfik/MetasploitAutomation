@@ -6,6 +6,27 @@ from metasploit.api.response import HttpCodes
 logger = logging.getLogger("UserFixtures")
 
 
+@pytest.fixture(scope="session", autouse=True)
+def delete_all_users(request, user_api):
+    """
+    Deletes all the users left overs in the api.
+    """
+    def fin():
+        users_body_response, status_code = user_api.get_many()
+        assert status_code == HttpCodes.OK
+
+        for user_res in users_body_response:
+
+            username = user_res.get("username")
+            logger.info(f"Delete user {username}")
+            delete_body_response, status_code = user_api.delete(username=username)
+
+            assert delete_body_response == ''
+            assert status_code == HttpCodes.NO_CONTENT
+
+    request.addfinalizer(fin)
+
+
 @pytest.fixture(scope="class")
 def create_users(request, user_api):
     """

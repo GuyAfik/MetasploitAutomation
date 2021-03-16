@@ -1,4 +1,3 @@
-import os
 from flask_restful import Api, request
 from flask import Flask
 
@@ -35,6 +34,10 @@ class FlaskAppWrapper(object):
         self._api = Api(app=app)
         self._app = app
         self.add_all_endpoints()
+
+    @property
+    def app(self):
+        return self._app
 
     @application.errorhandler(HttpCodes.NOT_FOUND)
     def invalid_urls_error(self):

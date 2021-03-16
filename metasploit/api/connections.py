@@ -50,7 +50,9 @@ class SSH(Connection):
         self._ssh_client = paramiko.SSHClient()
         self._ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self._private_key = paramiko.RSAKey.from_private_key(
-            file_obj=open(private_key) if private_key == aws_const.DEFAULT_PRIVATE_KEY_PATH else io.StringIO(private_key)
+            file_obj=open(
+                private_key
+            ) if private_key == aws_const.DEFAULT_PRIVATE_KEY_PATH else io.StringIO(private_key)
         )
         self._hostname = hostname
 

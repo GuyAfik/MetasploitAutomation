@@ -8,6 +8,29 @@ from metasploit.api.connections import SSH
 logger = logging.getLogger("DockerApiFixtures")
 
 
+@pytest.fixture(scope="session", autouse=True)
+def delete_all_docker_servers(request, docker_server_api):
+    """
+    Deletes the docker server leftovers instances that were created.
+    """
+    def fin():
+        docker_servers, actual_status_code = docker_server_api.get_many()
+        assert actual_status_code == HttpCodes.OK
+
+        for docker_server in docker_servers:
+
+            docker_server_id = docker_server.get("_id")
+            err_msg = f"Failed to delete docker server ID {docker_server_id}"
+
+            logger.info(f"Delete docker server ID {docker_server_id}")
+            response, code = docker_server_api.delete(instance_id=docker_server_id)
+
+            assert code == HttpCodes.NO_CONTENT, err_msg
+            assert response == '', err_msg
+
+    request.addfinalizer(fin)
+
+
 @pytest.fixture(scope="class")
 def create_docker_servers(request, docker_server_api):
     """

@@ -1,5 +1,6 @@
 
 import docker
+from docker.errors import DockerException
 
 from metasploit.api.connections import (
     Connection,
@@ -38,12 +39,13 @@ class Docker(Connection):
         connection_attempts = 0
         while connection_attempts < 5:
             try:
+
                 self._docker_client = docker.DockerClient(base_url=base_url)
                 self._api_client = docker.APIClient(base_url=base_url)
 
-                self._docker_client.ping()
-                break
-            except ConnectionError:
+                if self._docker_client.ping():
+                    break
+            except (ConnectionError, DockerException):
                 if not ssh:
                     ssh = SSH(hostname=docker_server_ip)
 
