@@ -11,3 +11,5 @@ client//coverage
 client//build
 client/package-lock.json
 
+venv
+

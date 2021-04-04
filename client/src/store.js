@@ -1,10 +1,11 @@
 import {applyMiddleware, combineReducers, createStore} from "redux";
 import logger from "redux-logger";
-import cardsReducer from "./reducers/cardsReducer"
+import userReducer from "./reducers/userReducer"
 import sideDrawerReducer from "./reducers/sideDrawerReducer";
-import newUserModalReducer from "./reducers/newUserModalReducer";
+import modalsReducer from "./reducers/modalsReducer";
+import thunk from "redux-thunk";
 
 
-export default createStore(combineReducers({cardsReducer, sideDrawerReducer, newUserModalReducer}),
+export default createStore(combineReducers({userReducer, sideDrawerReducer, modalsReducer: modalsReducer}),
     {},
-    applyMiddleware(logger));
+    applyMiddleware(logger, thunk));

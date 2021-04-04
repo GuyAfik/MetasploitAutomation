@@ -2,30 +2,52 @@ import React, {useState} from 'react';
 import {Alert, Button, Input, Space, Spin} from 'antd';
 import {UserOutlined, LockOutlined} from '@ant-design/icons';
 import {useHistory} from "react-router-dom";
-import {openNewUserModal} from "../actions/newUserModalActions";
+import {openNewUserModal} from "../actions/modalsActions";
 import NewUserModal from "../components/NewUserModal";
 import {connect} from "react-redux";
+import {newSession} from "../actions/userActions";
+import {getUser, isEmailValid} from '../Utils/Utils';
+import Handler from "../handler/Handler";
 
 const LoginPage = props => {
+    // let i = new Handler();
+    // i.setAge(20);
+    // i.printAge();
+    //
+    // let j = new Handler();
+    // j.setAge(30);
+    // j.printAge();
+    //
+    // i.printAge();
+
     const history = useHistory();
-    const [showAlert, setShowAlert] = useState(false);
+    const [alert, setAlert] = useState({isShown: false, description: ""});
     const [isLoading, setIsLoading] = useState(false);
     const [userEmail, setUserEmail] = useState("");
     const [userPassword, setUserPassword] = useState("");
 
     const performLogin = () => {
         setIsLoading(true);
-        setTimeout(() => {
-            if (userEmail === "" || userPassword === "") {
-                setShowAlert(true);
-                setIsLoading(false);
-            } else {
-                console.log(userEmail, userPassword)
+        if (userEmail === "" || userPassword === "") {
+            setAlert({isShown: true, description: "Email or Password are empty!"});
+            setIsLoading(false);
+        } else if (!isEmailValid(userEmail)) {
+            setAlert({isShown: true, description: "Email is invalid! it should be in the form: xxx@xxx.xxx"});
+            setIsLoading(false);
+        } else if (userPassword.length < 8) {
+            setAlert({isShown: true, description: "Password length should be at least 8 characters!"});
+            setIsLoading(false);
+        } else {
+            getUser(userEmail, userPassword).then(user => {
+                props.startNewSession(user);
                 history.push('/home');
-            }
-        }, 1500);
+            }).catch(err => {
+                console.log(err);
+                setAlert({isShown: true, description: "User is not register or the details you provided are incorrect"});
+                setIsLoading(false);
+            })
+        }
     }
-
 
     return (
         <div style={{
@@ -56,10 +78,10 @@ const LoginPage = props => {
                     </div>
                 }
             </div>
-            {showAlert ? <Alert
+            {alert.isShown ? <Alert
                 style={{width: '400px', alignSelf: "center"}}
                 message="Error"
-                description="Email or password are wrong. Please try again"
+                description={alert.description}
                 type="error"
                 showIcon
             /> : null}
@@ -68,7 +90,7 @@ const LoginPage = props => {
 
 const mapStateToProps = (state) => {
     return {
-        newUserModal: state.newUserModalReducer
+        userR: state.userReducer
     };
 }
 
@@ -76,6 +98,9 @@ const mapDispatchToProps = (dispatch) => {
     return {
         open: () => {
             dispatch(openNewUserModal())
+        },
+        startNewSession: (user) => {
+            dispatch(newSession(user))
         }
     };
 }

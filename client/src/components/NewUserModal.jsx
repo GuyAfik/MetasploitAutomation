@@ -1,24 +1,22 @@
 import React, {useState} from 'react';
 import {Alert, Input, Modal, Space} from "antd";
-import {closeNewUserModal} from "../actions/newUserModalActions";
+import {closeNewUserModal} from "../actions/modalsActions";
 import {connect} from "react-redux";
 import {LockOutlined, UserOutlined} from "@ant-design/icons";
+import {createUser, isEmailValid} from "../Utils/Utils";
 
 const NewUserModal = props => {
     const [confirmLoading, setConfirmLoading] = useState(false);
-    const [ShowAlert, setShowAlert] = useState(false);
-    const [newUser, setNewUser] = useState({email: "", newPass: "", newPassRepeat: ""});
-    const emailRegex = /^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[A-Za-z]+$/;
-
-    const isEmailValid = () => {
-        if (!emailRegex.test(newUser.email)) {
-            return false
-        }
-        return true
-    }
+    const [alert, setAlert] = useState({isShown: false, description: ""});
+    const [newUser, setNewUser] = useState({
+        name: "",
+        email: "",
+        newPass: "",
+        newPassRepeat: ""
+    });
 
     const isNewUserValid = () => {
-        if (newUser.email === "" || newUser.newPass === "" || newUser.newPassRepeat === "") {
+        if (newUser.email === "" || newUser.newPass === "" || newUser.newPassRepeat === "" || newUser.name === "") {
             return false
         }
         if (!isEmailValid()) {
@@ -32,21 +30,25 @@ const NewUserModal = props => {
 
     const handleOk = () => {
         setConfirmLoading(true);
-        setTimeout(() => {
-            if (isNewUserValid()) {
+        // if (isNewUserValid()) {
+            createUser(newUser).then(res => {
+                console.log(res)
                 props.close();
+                setAlert({...alert, isShown: false})
                 setConfirmLoading(false);
-                setShowAlert(false)
-            } else {
-                setShowAlert(true)
-                console.log("Not Valid User!")
+            }).catch(err => {
+                console.log(err)
                 setConfirmLoading(false);
-            }
-        }, 2000)
+                setAlert({isShown: true, description: err})
+            });
+        // } else {
+        //     setConfirmLoading(false);
+        //     setAlert({isShown: true, description: 'User is not Valid!'})
+        // }
     };
 
     const handleCancel = () => {
-        setShowAlert(false)
+        setAlert({...alert, isShown: false})
         props.close();
     };
     return (
@@ -54,20 +56,22 @@ const NewUserModal = props => {
             <Modal
                 centered
                 title="New user"
-                visible={props.newUserModal.isOpen}
+                visible={props.modalsR.newUserModal.isOpen}
                 onOk={handleOk}
                 onCancel={handleCancel}
                 confirmLoading={confirmLoading}
             >
                 <div style={{display: "flex", alignSelf: "center", flexDirection: "column", width: '100%'}}>
                     <Space size={"large"} direction={"vertical"}>
+                        <Input size="large" placeholder="Enter your name" prefix={<UserOutlined/>}
+                               onChange={e => setNewUser({...newUser, lastName: e.target.value})}/>
                         <Input size="large" placeholder="Enter your email" prefix={<UserOutlined/>}
                                onChange={e => setNewUser({...newUser, email: e.target.value})}/>
                         <Input.Password size="large" placeholder="Enter new password" prefix={<LockOutlined/>}
                                         onChange={e => setNewUser({...newUser, newPass: e.target.value})}/>
                         <Input.Password size="large" placeholder="Enter new password again" prefix={<LockOutlined/>}
                                         onChange={e => setNewUser({...newUser, newPassRepeat: e.target.value})}/>
-                        {ShowAlert ? <Alert message="Be sure you've entered valid information" type="error"/> : null}
+                        {alert.isShown ? <Alert message={alert.description} type="error"/> : null}
                     </Space>
                 </div>
             </Modal>
@@ -77,7 +81,7 @@ const NewUserModal = props => {
 
 const mapStateToProps = (state) => {
     return {
-        newUserModal: state.newUserModalReducer
+        modalsR: state.modalsReducer
     };
 }
 

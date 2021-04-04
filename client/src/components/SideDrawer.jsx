@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {Drawer, Form, Button, Col, Row, Input, Select, Result} from 'antd';
 import {connect} from 'react-redux';
 import {closeSideDrawer} from "../actions/sideDrawerActions";
-import {addCard} from "../actions/cardsActions";
+import {addCard} from "../actions/userActions";
 
 const {Option} = Select;
 
