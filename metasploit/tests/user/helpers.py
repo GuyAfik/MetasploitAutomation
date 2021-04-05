@@ -19,20 +19,18 @@ def is_user_response_body_valid(user_response_body, **expected):
     Returns:
         bool: True if user response body is valid, False otherwise.
     """
-    if "_id" not in user_response_body:
-        logger.error(f"There is no _id key in the user response body {user_response_body}")
+    _id, _name, _data = "_id", "name", "data"
+
+    if _id not in user_response_body:
+        logger.error(f"There is no {_id} key in the user response body {user_response_body}")
         return False
 
-    if "email" not in user_response_body:
-        logger.error(f"There is no email key in the user response body {user_response_body}")
+    if _name not in user_response_body:
+        logger.error(f"There is no {_name} key in the user response body {user_response_body}")
         return False
 
-    if "firstName" not in user_response_body:
-        logger.error(f"There is no first_name key in the user response body {user_response_body}")
-        return False
-
-    if "lastName" not in user_response_body:
-        logger.error(f"There is no last_name key in the user response body {user_response_body}")
+    if _data not in user_response_body:
+        logger.error(f"There is not {_data} key in the user response body {user_response_body}")
         return False
 
     return is_user_response_body_expected(user_response_body, **expected)

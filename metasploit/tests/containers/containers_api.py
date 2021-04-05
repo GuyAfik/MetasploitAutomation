@@ -3,7 +3,7 @@ import pytest
 
 from metasploit.tests.test_wrapper import BaseApiInterface
 from metasploit.tests.helpers import to_utf8
-from metasploit.tests.helpers import execute_rest_api_func
+from metasploit.tests.helpers import execute_rest_api_request
 
 from . import config
 logger = logging.getLogger("ContainersApi")
@@ -33,7 +33,7 @@ def container_api(test_client):
             create_msfrpcd_container_url = create_msfrpcd_container_url.format(instance_id=instance_id)
             logger.info(f"Send POST request, URL: {create_msfrpcd_container_url}")
 
-            return execute_rest_api_func(url=create_msfrpcd_container_url, api_func=self._test_client.post)
+            return execute_rest_api_request(url=create_msfrpcd_container_url, api_func=self._test_client.post)
 
         def get_many(self, instance_id):
             """
@@ -49,7 +49,7 @@ def container_api(test_client):
             get_all_containers_url = config.GET_CONTAINERS_URL.format(instance_id=instance_id)
             logger.info(f"Send GET request, URL: {get_all_containers_url}")
 
-            return execute_rest_api_func(url=get_all_containers_url, api_func=self._test_client.get)
+            return execute_rest_api_request(url=get_all_containers_url, api_func=self._test_client.get)
 
         def get_one(self, instance_id, container_id):
             """
@@ -65,7 +65,7 @@ def container_api(test_client):
             get_container_url = config.GET_CONTAINER_URL.format(instance_id=instance_id, container_id=container_id)
             logger.info(f"Send GET request, URL: {get_container_url}")
 
-            return execute_rest_api_func(url=get_container_url, api_func=self._test_client.get)
+            return execute_rest_api_request(url=get_container_url, api_func=self._test_client.get)
 
         def delete(self, instance_id, container_id):
             """
@@ -83,7 +83,7 @@ def container_api(test_client):
             )
             logger.info(f"Send DELETE request, URL: {delete_container_url}")
 
-            return execute_rest_api_func(
+            return execute_rest_api_request(
                 url=delete_container_url, api_func=self._test_client.delete, convert_func=to_utf8
             )
 

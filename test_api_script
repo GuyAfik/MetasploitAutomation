@@ -6,3 +6,4 @@ pytest --log-cli-level=20 metasploit/tests/docker_server/
 
 pytest --log-cli-level=20 metasploit/tests/containers
 
+pytest --log-cli-level=20 metasploit/tests/user

@@ -4,7 +4,7 @@ import pytest
 from metasploit.tests.test_wrapper import BaseApiInterface
 from metasploit.tests.helpers import (
     to_utf8,
-    execute_rest_api_func
+    execute_rest_api_request
 )
 
 from . import config
@@ -23,9 +23,9 @@ def docker_server_api(test_client):
     class DockerServerApi(BaseApiInterface):
 
         def post(
-                self,
-                create_docker_server_url=config.CREATE_DOCKER_SERVER_URL,
-                create_docker_server_request=config.CREATE_DOCKER_SERVER_REQUEST
+            self,
+            create_docker_server_url=config.CREATE_DOCKER_SERVER_URL,
+            create_docker_server_request=config.CREATE_DOCKER_SERVER_REQUEST
         ):
             """
             Sends a POST request in order to create new docker server.
@@ -39,7 +39,7 @@ def docker_server_api(test_client):
             """
             logger.info(f"Send POST request, URL: {create_docker_server_url}, REQUEST: {create_docker_server_request}")
 
-            return execute_rest_api_func(
+            return execute_rest_api_request(
                 url=create_docker_server_url,
                 api_func=self._test_client.post,
                 request_body=create_docker_server_request
@@ -56,7 +56,7 @@ def docker_server_api(test_client):
             get_all_docker_servers_url = config.GET_ALL_DOCKER_SERVERS_URL
             logger.info(f"Send GET request, URL: {get_all_docker_servers_url}")
 
-            return execute_rest_api_func(url=get_all_docker_servers_url, api_func=self._test_client.get)
+            return execute_rest_api_request(url=get_all_docker_servers_url, api_func=self._test_client.get)
 
         def get_one(self, instance_id):
             """
@@ -71,7 +71,7 @@ def docker_server_api(test_client):
             get_docker_server_url = config.GET_DOCKER_SERVER_URL.format(instance_id=instance_id)
             logger.info(f"Send GET request, URL: {get_docker_server_url}")
 
-            return execute_rest_api_func(url=get_docker_server_url, api_func=self._test_client.get)
+            return execute_rest_api_request(url=get_docker_server_url, api_func=self._test_client.get)
 
         def delete(self, instance_id):
             """
@@ -86,7 +86,7 @@ def docker_server_api(test_client):
             delete_docker_server_url = config.DELETE_DOCKER_SERVER_URL.format(instance_id=instance_id)
             logger.info(f"Send DELETE request, URL: {delete_docker_server_url}")
 
-            return execute_rest_api_func(
+            return execute_rest_api_request(
                 url=delete_docker_server_url, api_func=self._test_client.delete, convert_func=to_utf8
             )
 

@@ -6,14 +6,13 @@ from metasploit.api.response import HttpCodes
 from metasploit.tests.conftest import test_client  # noqa: F401
 from metasploit.tests.helpers import (
     is_expected_code,
-    is_error_response_valid,
-    load_json
+    is_error_response_valid
 )
 
 
 from . import config
 from .user_api import user_api  # noqa: F401
-from .fixtures import create_users  # noqa: F401
+from .fixtures import create_users, find_user_response  # noqa: F401
 from .helpers import is_user_response_body_valid
 
 
@@ -32,20 +31,16 @@ class TestCreateUserPostApi(object):
                 id="Create_user_with_invalid_email"
             ),
             pytest.param(
-                config.USER_REQUEST_WITH_NUMBERS_IN_FIRST_NAME,
-                id="Create_user_with_numbers_in_first_name"
-            ),
-            pytest.param(
-                config.USER_REQUEST_WITH_NUMBERS_IN_LAST_NAME,
-                id="Create_user_with_numbers_in_last_name"
+                config.USER_REQUEST_WITH_NUMBERS_IN_NAME,
+                id="Create_user_with_numbers_in_name"
             ),
             pytest.param(
                 config.USER_REQUEST_WITH_SHORT_PASSWORD,
                 id="Create_user_with_short_password"
             ),
             pytest.param(
-                config.USER_REQUEST_WITHOUT_FIRST_NAME_AND_LAST_NAME,
-                id="Create_user_without_first_name_and_last_name_in_body_request"
+                config.USER_REQUEST_WITHOUT_NAME,
+                id="Create_user_without_name"
             ),
             pytest.param(
                 config.USER_REQUEST_WITHOUT_PASSWORD_AND_USER_NAME,
@@ -79,7 +74,6 @@ class TestCreateUserPostApi(object):
             logger.info(f"Verify that the user body response {new_user_body_response} is valid")
             assert is_user_response_body_valid(
                 user_response_body=new_user_body_response,
-
             )
 
             logger.info(f"Verify that status code is {HttpCodes.OK}")
@@ -138,26 +132,26 @@ class TestGetUserApi(object):
         )
 
     @pytest.mark.parametrize(
-        "username, password",
+        "email, password",
         [
             pytest.param(
-                config.NON_EXISTING_USER_NAME,
+                config.INVALID_EMAIL,
                 config.VALID_PASSWORD_1,
-                id="Get_user_with_valid_password_and_bad_username"
+                id="Get_user_with_valid_password_and_bad_email"
             ),
             pytest.param(
-                config.USER_NAME_1,
+                config.VALID_EMAIL_2,
                 config.INVALID_PASSWORD,
-                id="Get_user_with_invalid_password_and_valid_username"
+                id="Get_user_with_invalid_password_and_valid_email"
             ),
         ]
     )
     @pytest.mark.usefixtures(create_users.__name__)
-    def test_get_user_fails(self, username, password, user_api):
+    def test_get_user_fails(self, email, password, user_api):
         """
         Tests scenarios in which trying to get a user with invalid credentials should fail.
         """
-        user_response_body, actual_status_code = user_api.get_one(username=username, password=password)
+        user_response_body, actual_status_code = user_api.get_one(email=email, password=password)
 
         logger.info(f"Verify that the user body response {user_response_body} is an ERROR")
         assert is_error_response_valid(error_response=user_response_body, code=HttpCodes.UNAUTHORIZED)
@@ -168,25 +162,25 @@ class TestGetUserApi(object):
         )
 
     @pytest.mark.parametrize(
-        "username, password",
+        "email, password",
         [
             pytest.param(
-                config.USER_NAME_1,
+                config.VALID_EMAIL,
                 config.VALID_PASSWORD_1,
                 id="Get_user_with_valid_password_and_bad_username"
             ),
             pytest.param(
-                config.USER_NAME_2,
+                config.VALID_EMAIL_2,
                 config.VALID_PASSWORD_2,
                 id="Get_user_with_invalid_password_and_valid_username"
             ),
         ]
     )
-    def test_get_user_succeed(self, username, password, user_api):
+    def test_get_user_succeed(self, email, password, user_api):
         """
         Tests scenarios in which trying to get a user with a valid credentials should succeed.
         """
-        user_response_body, actual_status_code = user_api.get_one(username=username, password=password)
+        user_response_body, actual_status_code = user_api.get_one(email=email, password=password)
 
         logger.info(f"Verify that the user body response {user_response_body} is valid")
         assert is_user_response_body_valid(user_response_body=user_response_body)
@@ -221,26 +215,23 @@ class TestDeleteUserApi(object):
     is_delete_user_required = False
 
     @pytest.mark.parametrize(
-        "invalid_username",
+        "invalid_email",
         [
             pytest.param(
-                config.INVALID_USER_NAME,
-                id="Get_user_with_valid_password_and_bad_username"
+                config.INVALID_EMAIL,
+                id="Delete_user_with_invalid_email"
             ),
             pytest.param(
-                config.NON_EXISTING_USER_NAME,
-                id="Get_user_with_invalid_password_and_valid_username"
+                config.VALID_NON_EXISTING_EMAIL,
+                id="Delete_user_with_non_existing_email"
             ),
         ]
     )
-    def test_delete_user_fails(self, invalid_username, user_api):
+    def test_delete_user_fails(self, invalid_email, user_api):
         """
         Tests scenarios where trying to delete a user that does not exist fails.
         """
-        user_body_response, actual_status_code = user_api.delete(username=invalid_username)
-
-        if isinstance(user_body_response, str):
-            user_body_response = load_json(string=user_body_response)
+        user_body_response, actual_status_code = user_api.delete(email=invalid_email, expected_to_fail=True)
 
         logger.info(f"Verify that DELETE body response {user_body_response} is an ERROR")
         assert is_error_response_valid(error_response=user_body_response, code=HttpCodes.NOT_FOUND), (
@@ -253,28 +244,100 @@ class TestDeleteUserApi(object):
         )
 
     @pytest.mark.parametrize(
-        "valid_username",
+        "valid_email",
         [
             pytest.param(
-                config.USER_NAME_1,
+                config.VALID_EMAIL,
                 id="Get_user_with_valid_password_and_bad_username"
             ),
             pytest.param(
-                config.USER_NAME_2,
+                config.VALID_EMAIL_2,
                 id="Get_user_with_invalid_password_and_valid_username"
             ),
         ]
     )
-    def test_delete_user_succeed(self, valid_username, user_api):
+    def test_delete_user_succeed(self, valid_email, user_api):
         """
         Tests scenarios where trying to delete a valid user fails.
         """
-        user_body_response, actual_status_code = user_api.delete(username=valid_username)
+        user_body_response, actual_status_code = user_api.delete(email=valid_email)
 
         logger.info(f"Verify that the DELETE body response is an empty string")
-        assert user_body_response == '', f"Failed to delete user with username {valid_username}"
+        assert user_body_response == '', f"Failed to delete user with username {valid_email}"
 
         logger.info(f"Verify that the DELETE response status code is {HttpCodes.NO_CONTENT}")
         assert is_expected_code(actual_code=actual_status_code, expected_code=HttpCodes.NO_CONTENT), (
             f"actual {actual_status_code}, expected {HttpCodes.NO_CONTENT}"
         )
+
+
+class TestPutUserApi(object):
+
+    create_user_body_requests = [config.USER_REQUEST_VALID_1, config.USER_REQUEST_VALID_2]
+
+    @pytest.mark.parametrize(
+        ("email", "password", "update_user_body_request"),
+        [
+            pytest.param(
+                config.VALID_EMAIL,
+                config.VALID_PASSWORD_1,
+                config.UPDATE_USER_BODY_REQUEST_WITH_FAKE_PARAMS_1,
+                id="Update_user_with_invalid_parameters_1"
+            ),
+            pytest.param(
+                config.VALID_EMAIL_2,
+                config.VALID_PASSWORD_2,
+                config.UPDATE_USER_BODY_REQUEST_WITH_FAKE_PARAMS_2,
+                id="Update_user_with_invalid_parameters_2"
+            ),
+        ]
+    )
+    def test_update_user_with_unexpected_parameters(
+        self, email, password, update_user_body_request, user_api, find_user_response
+    ):
+        """
+        Tests scenarios where updating fields of a user that cannot be updated do nothing.
+        """
+        body_response_before_update = find_user_response
+
+        user_body_response, actual_status_code = user_api.put(email=email, request_body=update_user_body_request)
+
+        logger.info(f"Verify that the PUT body response is an empty string")
+        assert user_body_response == '', f"Failed to update user with username {email} password {password}"
+
+        logger.info(f"Verify that the PUT response status code is {HttpCodes.NO_CONTENT}")
+        assert is_expected_code(actual_code=actual_status_code, expected_code=HttpCodes.NO_CONTENT), (
+            f"actual {actual_status_code}, expected {HttpCodes.NO_CONTENT}"
+        )
+
+        user_body_response_post_update, _ = user_api.get_one(email=email, password=password)
+        assert body_response_before_update == user_body_response_post_update
+
+    @pytest.mark.parametrize(
+        ("email", "update_user_body_request"),
+        [
+            pytest.param(
+                config.VALID_NON_EXISTING_EMAIL,
+                config.UPDATE_USER_BODY_REQUEST_WITH_FAKE_PARAMS_1,
+                id="Update_user_with_invalid_email"
+            )
+        ]
+    )
+    def test_update_user_with_invalid_credentials(self, email, update_user_body_request, user_api):
+        """
+        Tests scenarios where updating a user with invalid credentials should fail.
+        """
+        user_body_response, actual_status_code = user_api.put(
+            email=email, request_body=update_user_body_request, expected_to_fail=True
+        )
+
+        logger.info(f"Verify that PUT body response {user_body_response} is an ERROR")
+        assert is_error_response_valid(error_response=user_body_response, code=HttpCodes.UNAUTHORIZED), (
+            f"Response body {user_body_response} is not as expected"
+        )
+
+        logger.info(f"Verify that the PUT response status code is {HttpCodes.UNAUTHORIZED}")
+        assert is_expected_code(actual_code=actual_status_code, expected_code=HttpCodes.UNAUTHORIZED), (
+            f"actual {actual_status_code}, expected {HttpCodes.UNAUTHORIZED}"
+        )
+

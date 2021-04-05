@@ -144,7 +144,7 @@ def is_error_response_body_expected(error_response_body, **expected):
     return True
 
 
-def execute_rest_api_func(url, api_func, convert_func=convert, request_body=None):
+def execute_rest_api_request(url, api_func, convert_func=convert, request_body=None):
     """
     Execute the REST-API Http request to the server [POST, GET, DELETE]
 
