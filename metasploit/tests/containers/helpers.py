@@ -1,6 +1,6 @@
 import logging
 
-from metasploit.api.response import create_new_response
+from metasploit.api.response import new_container_response
 from metasploit.api.docker.docker_operations import ContainerOperations
 
 logger = logging.getLogger("ContainerHelpers")
@@ -121,10 +121,10 @@ def get_container_expected_response(instance_id, container_id):
     Returns:
         dict: expected container response from the API.
     """
-    return create_new_response(
-        obj=ContainerOperations(
+    return new_container_response(
+        container=ContainerOperations(
             docker_server_id=instance_id, docker_resource_id=container_id
-        ).container, response_type='Container'
+        ).container
     )
 
 

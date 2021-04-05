@@ -6,24 +6,26 @@ from metasploit.api.utils.helpers import (
     validate_api_request_arguments
 )
 from metasploit.api.response import (
-    ErrorResponse,
     ApiResponse,
-    HttpCodes
+    HttpCodes,
+    ErrorResponse
 )
 from metasploit.api.errors import (
     BadJsonInput,
-    InvalidInputTypeError,
-    choose_http_error_code
+    InvalidInputTypeError
 )
-from boto3.exceptions import Boto3Error
-from docker.errors import DockerException
 from metasploit.api.aws.amazon_operations import DockerServerInstanceOperations
 from metasploit.api import constants as global_const
 from metasploit.api.errors import (
-    ApiException,
-    AmazonResourceNotFoundError,
     MetasploitActionError
 )
+
+from metasploit.api.errors import (
+    choose_http_error_code,
+    ApiException
+)
+from boto3.exceptions import Boto3Error
+from docker.errors import DockerException
 
 
 def validate_json_request(*expected_args):
@@ -73,6 +75,45 @@ def validate_json_request(*expected_args):
     return decorator_validate_json
 
 
+def response_decorator(code):
+    """
+    Decorator to execute all the API services implementations and parse a valid response to them.
+
+    Args:
+        code (int): http code that should indicate about success.
+    """
+    def first_wrapper(func):
+        """
+        wrapper to get the service function.
+
+        Args:
+            func (Function): a function object representing the API service function.
+        """
+        def second_wrapper(*args, **kwargs):
+            """
+            Args:
+                args: function args
+                kwargs: function kwargs
+
+            Returns:
+                Response: flask api response.
+            """
+            try:
+                return ApiResponse(response=func(*args, **kwargs), http_status_code=code)()
+            except ApiException as exc:
+                return ErrorResponse(
+                    error_msg=str(exc), http_error_code=exc.error_code, req=request.json, path=request.base_url
+                )()
+            except (Boto3Error, DockerException) as exc:
+                error_code = choose_http_error_code(error=exc)
+                return ErrorResponse(
+                    error_msg=str(exc), http_error_code=error_code, req=request.json, path=request.base_url
+                )()
+
+        return second_wrapper
+    return first_wrapper
+
+
 def update_containers_status(func):
     """
     Updates containers status in case there is any change with them ( running state ---> stopped state for example)
@@ -101,45 +142,6 @@ def update_containers_status(func):
                             )
         return func(self, **kwargs)
     return wrapper
-
-
-def response_decorator(code):
-    """
-    Decorator to execute all the API services implementations and parse a valid response to them.
-
-    Args:
-        code (int): http code that should indicate about success.
-    """
-    def first_wrapper(func):
-        """
-        wrapper to get the service function.
-
-        Args:
-            func (Function): a function object representing the API service function.
-        """
-        def second_wrapper(*args, **kwargs):
-            """
-            Args:
-                args: function args
-                kwargs: function kwargs
-
-            Returns:
-                Response: flask api response.
-            """
-            try:
-                return ApiResponse(response=func(*args, **kwargs), http_status_code=code).make_response
-            except ApiException as exc:
-                return ErrorResponse(
-                    error_msg=str(exc), http_error_code=exc.error_code, req=request.json, path=request.base_url
-                ).make_response
-            except (Boto3Error, DockerException) as exc:
-                error_code = choose_http_error_code(error=exc)
-                return ErrorResponse(
-                    error_msg=str(exc), http_error_code=error_code, req=request.json, path=request.base_url
-                ).make_response
-
-        return second_wrapper
-    return first_wrapper
 
 
 def metasploit_action_verification(func):

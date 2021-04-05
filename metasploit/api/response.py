@@ -1,5 +1,4 @@
-from flask import jsonify
-from flask import make_response
+from flask import jsonify, make_response
 
 
 class HttpCodes(object):
@@ -31,8 +30,7 @@ class ApiResponse(object):
         self._response = response
         self._http_status_code = http_status_code
 
-    @property
-    def make_response(self):
+    def __call__(self):
         """
         Returns an API response for the client.
 
@@ -81,53 +79,83 @@ class ErrorResponse(ApiResponse):
         super(ErrorResponse, self).__init__(response=response, http_status_code=http_error_code)
 
 
-def create_new_response(obj, response_type='Instance'):
+def new_docker_instance_response(instance):
+    """
+    Creates new docker response for the client & DB.
 
-    if response_type == 'Instance':
-        return {
-            "_id": obj.instance_id,
-            "IpParameters": {
-                "PublicIpAddress": obj.public_ip_address,
-                "PublicDNSName": obj.public_dns_name,
-                "PrivateIpAddress": obj.private_ip_address,
-                "PrivateDNSName": obj.private_dns_name
-            },
-            "SecurityGroups": obj.security_groups,
-            "State": obj.state,
-            "Containers": [],
-            "Images": [],
-            "Metasploit": []
-        }
-    elif response_type == 'Container':
-        obj.reload()
-        return {
-            "_id": obj.id,
-            "image": obj.image.tags,
-            "name": obj.name,
-            "status": obj.status,
-            "ports": obj.ports
-        }
-    elif response_type == 'Image':
-        return {
-            "_id": obj.id,
-            "tags": obj.tags
-        }
-    elif response_type == 'User':
-        return {
-            "_id": obj.id,
-            "firstName": obj.first_name,
-            "lastName": obj.last_name,
-            "email": obj.email
-        }
+    Args:
+        instance (DockerServerInstance): docker server object.
+
+    Returns:
+         dict: instance response.
+    """
+    return {
+        "_id": instance.instance_id,
+        "IpParameters": {
+            "PublicIpAddress": instance.public_ip_address,
+            "PublicDNSName": instance.public_dns_name,
+            "PrivateIpAddress": instance.private_ip_address,
+            "PrivateDNSName": instance.private_dns_name
+        },
+        "SecurityGroups": instance.security_groups,
+        "State": instance.state,
+        "Containers": [],
+        "Images": [],
+        "Metasploit": []
+    }
+
+
+def new_container_response(container):
+    """
+    Creates a new container response for the client and DB.
+
+    Args:
+        container (Container): container object.
+
+    Returns:
+        dict: container response.
+    """
+    container.reload()
+    return {
+        "_id": container.id,
+        "image": container.image.tags,
+        "name": container.name,
+        "status": container.status,
+        "ports": container.ports
+    }
+
+
+def client_user_response(user):
+    """
+    Creates a new user response for the client.
+
+    Args:
+        user (User): user object.
+
+    Returns:
+        dict: user response.
+    """
+    return {
+        "_id": user.id,
+        "name": user.name,
+        "data": user.data
+    }
 
 
 def fill_user_document(user):
+    """
+    Creates a new user response for the DB.
 
+    Args:
+        user (User): user object.
+
+    Returns:
+        dict: user response.
+    """
     return {
         "_id": user.id,
         "email": user.email,
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-        "username": user.username,
-        "password": user.hashed_password,
+        "name": user.name,
+        "password": user.password,
+        "data": user.data
     }

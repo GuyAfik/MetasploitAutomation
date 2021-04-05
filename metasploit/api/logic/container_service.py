@@ -8,9 +8,7 @@ from metasploit.api.docker.docker_operations import ContainerOperations
 from metasploit.api.utils.decorators import (
     update_containers_status
 )
-from metasploit.api.response import (
-    create_new_response
-)
+from metasploit.api.response import new_container_response
 
 
 class ContainerServiceImplementation(ContainerService):
@@ -82,7 +80,7 @@ class ContainerServiceImplementation(ContainerService):
             docker_server_id=instance_id
         ).run_container_with_msfrpcd_metasploit(containers_documents=all_containers_documents)
 
-        container_response = create_new_response(obj=new_container, response_type=self.type)
+        container_response = new_container_response(container=new_container)
 
         self.database.add_docker_document(
             amazon_resource_id=instance_id, docker_document_type=self.type, new_docker_document=container_response

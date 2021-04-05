@@ -29,6 +29,17 @@ class ApiException(Exception):
             return f"{self.error_code} Client error: {self.error_msg}"
         elif self._is_server_error():
             return f"{self.error_code} Server error: {self.error_msg}"
+        else:
+            return 'Unknown error!'
+
+    def __repr__(self):
+
+        if self._is_client_error():
+            return f"{self.error_code} Client error: {self.error_msg}"
+        elif self._is_server_error():
+            return f"{self.error_code} Server error: {self.error_msg}"
+        else:
+            return 'Unknown error!'
 
     def _is_client_error(self):
         return 400 <= self.error_code < 500
@@ -142,8 +153,8 @@ class BadEmailError(ApiException):
 
 class BadFirstNameOrLastName(ApiException):
 
-    def __init__(self, first_name, last_name, error_code=HttpCodes.BAD_REQUEST):
-        err_msg = f"first name {first_name} and/or last name {last_name} must contain alphabetic characters only!"
+    def __init__(self, name, error_code=HttpCodes.BAD_REQUEST):
+        err_msg = f"name {name} must contain alphabetic characters only!"
         super().__init__(error_msg=err_msg, error_code=error_code)
 
 

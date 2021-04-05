@@ -71,7 +71,7 @@ class FlaskAppWrapper(object):
         }
         return ErrorResponse(
             error_msg=err_msg, http_error_code=HttpCodes.BAD_REQUEST, req=request.json, path=request.base_url
-        ).make_response
+        )()
 
     @application.errorhandler(HttpCodes.METHOD_NOT_ALLOWED)
     def method_not_allowed(self):
@@ -86,7 +86,7 @@ class FlaskAppWrapper(object):
             http_error_code=HttpCodes.METHOD_NOT_ALLOWED,
             req=request.json,
             path=request.base_url
-        ).make_response
+        )()
 
     @application.errorhandler(HttpCodes.BAD_REQUEST)
     def bad_request(self):
@@ -101,7 +101,7 @@ class FlaskAppWrapper(object):
             http_error_code=HttpCodes.BAD_REQUEST,
             req=request.json,
             path=request.base_url
-        ).make_response
+        )()
 
     def get_api(self):
         """
@@ -258,7 +258,15 @@ class FlaskAppWrapper(object):
 
         self._api.add_resource(
             UserController,
-            '/Users/Get/<username>/<password>',
+            '/Users/Update/<email>',
+            endpoint='/Users/Update/<email>',
+            methods=[HttpMethods.PUT],
+            resource_class_kwargs=user_controller_kwargs,
+        )
+
+        self._api.add_resource(
+            UserController,
+            '/Users/Get/<email>/<password>',
             endpoint='/Users/Get/<username>/<password>',
             methods=[HttpMethods.GET],
             resource_class_kwargs=user_controller_kwargs,
@@ -274,8 +282,8 @@ class FlaskAppWrapper(object):
 
         self._api.add_resource(
             UserController,
-            '/Users/Delete/<username>',
-            endpoint='/Users/Delete/<username>',
+            '/Users/Delete/<email>',
+            endpoint='/Users/Delete/<email>',
             methods=[HttpMethods.DELETE],
             resource_class_kwargs=user_controller_kwargs,
         )

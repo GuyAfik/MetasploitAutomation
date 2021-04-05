@@ -12,6 +12,9 @@ class ServiceWrapper(object):
     def create(self, *args, **kwargs):
         return self.class_type.create(*args, **kwargs)
 
+    def update(self, *args, **kwargs):
+        return self.class_type.update(*args, **kwargs)
+
     def get_all(self, *args, **kwargs):
         return self.class_type.get_all(*args, **kwargs)
 

@@ -54,14 +54,17 @@ class UserController(ControllerApi):
     def post(self, *args, **kwargs):
         return self._create_user_endpoint()
 
-    def get(self, username=None, password=None):
-        if username and password:
-            return self._get_specific_user_endpoint(username=username, password=password)
+    def get(self, email=None, password=None):
+        if email and password:
+            return self._get_specific_user_endpoint(email=email, password=password)
         else:
             return self._get_all_users_endpoint()
 
-    def delete(self, username):
-        return self._delete_user(username=username)
+    def delete(self, email):
+        return self._delete_user(email=email)
+
+    def put(self, email):
+        return self._update_user_endpoint(email=email)
 
     @response_decorator(HttpCodes.OK)
     def _create_user_endpoint(self):
@@ -71,9 +74,7 @@ class UserController(ControllerApi):
         Example of a body request:
 
         {
-            "first_name": "Guy",
-            "last_name": "Afik",
-            "username": "Great",
+            "name": "Guy",
             "password": "123456789", # must be more than 8 characters
             "email": "guyafik423468@gmail.com"
         }
@@ -83,13 +84,25 @@ class UserController(ControllerApi):
         """
         return ServiceWrapper(class_type=self._user_service_implementation).create(**request.json)
 
+    @response_decorator(HttpCodes.NO_CONTENT)
+    def _update_user_endpoint(self, email):
+        """
+        Updates the user endpoint.
+
+        Args:
+            email (str): user email.
+        """
+        return ServiceWrapper(
+            class_type=self._user_service_implementation
+        ).update(email=email, **request.json)
+
     @response_decorator(HttpCodes.OK)
-    def _get_specific_user_endpoint(self, username, password):
+    def _get_specific_user_endpoint(self, email, password):
         """
         Gets a single user endpoint.
 
         Args:
-            username (str): user name.
+            email (str): user email.
             password (str): user password.
 
         Returns:
@@ -97,7 +110,7 @@ class UserController(ControllerApi):
         """
         return ServiceWrapper(
             class_type=self._user_service_implementation
-        ).get_one(username=username, password=password)
+        ).get_one(email=email, password=password)
 
     @response_decorator(HttpCodes.OK)
     def _get_all_users_endpoint(self):
@@ -110,14 +123,14 @@ class UserController(ControllerApi):
         return ServiceWrapper(class_type=self._user_service_implementation).get_all()
 
     @response_decorator(HttpCodes.NO_CONTENT)
-    def _delete_user(self, username):
+    def _delete_user(self, email):
         """
         Delete user endpoint.
 
-        Returns:
-            Response: a flask response.
+        Args:
+            email (str): user email.
         """
-        return ServiceWrapper(class_type=self._user_service_implementation).delete_one(username=username)
+        return ServiceWrapper(class_type=self._user_service_implementation).delete_one(email=email)
 
 
 class InstancesController(ControllerApi):

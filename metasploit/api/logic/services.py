@@ -14,6 +14,9 @@ class Service(object):
     def delete_one(self, *args, **kwargs):
         pass
 
+    def update(self, *args, **kwargs):
+        pass
+
     def run(self, *args, **kwargs):
         pass
 

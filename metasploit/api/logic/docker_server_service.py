@@ -4,12 +4,10 @@ from metasploit.api.database import DatabaseOperations, DatabaseCollections
 from metasploit.api.aws.amazon_operations import create_instance
 from metasploit.api.aws import constants as aws_const
 from metasploit.api.aws.amazon_operations import DockerServerInstanceOperations
-from metasploit.api.response import (
-    create_new_response
-)
 from metasploit.api.utils.decorators import (
     validate_json_request
 )
+from metasploit.api.response import new_docker_instance_response
 
 
 class DockerServerServiceImplementation(DockerServerService):
@@ -84,7 +82,7 @@ class DockerServerServiceImplementation(DockerServerService):
             MinCount=aws_const.DEFAULT_MAX_MIN_COUNT
         )
 
-        docker_server_response = create_new_response(obj=new_docker_server, response_type=self.type)
+        docker_server_response = new_docker_instance_response(instance=new_docker_server)
         self.database.insert_amazon_document(new_amazon_document=docker_server_response)
 
         return docker_server_response
