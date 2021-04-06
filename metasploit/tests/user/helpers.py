@@ -12,9 +12,9 @@ def is_user_response_body_valid(user_response_body, **expected):
         user_response_body (dict): a user response body.
 
     Keyword arguments:
-         email (str): the expected email.
-         first_name (str): the expected first name.
-         last_name (str): the expected last name
+         _id (str): the expected user ID.
+         name (str): the expected user name.
+         data (str): the expected user data
 
     Returns:
         bool: True if user response body is valid, False otherwise.
@@ -44,32 +44,34 @@ def is_user_response_body_expected(user_response_body, **expected):
         user_response_body (dict): a user response body.
 
     Keyword arguments:
-         email (str): the expected email.
-         first_name (str): the expected first name.
-         last_name (str): the expected last name
+         _id (str): the expected user ID.
+         name (str): the expected user name.
+         data (str): the expected user data
 
     Returns:
         bool: True if user response body as expected, False otherwise.
     """
-    if "email" in expected:
-        expected_email = expected.get("email")
-        actual_email = user_response_body.get("email")
-        if expected_email != actual_email:
-            logger.error(f"actual email: {actual_email}, expected email: {expected_email}")
+    _id, _name, _data = "_id", "name", "data"
+
+    if _id in expected:
+        expected_id = expected.get(_id)
+        actual_id = user_response_body.get(_id)
+        if expected_id != actual_id:
+            logger.error(f"actual user ID: {actual_id}, expected ID: {expected_id}")
             return False
 
-    if "first_name" in expected:
-        expected_first_name = expected.get("first_name")
-        actual_first_name = user_response_body.get("first_name")
-        if expected_first_name != actual_first_name:
-            logger.error(f"actual first name: {actual_first_name}, expected first name: {expected_first_name}")
+    if _name in expected:
+        expected_name = expected.get(_name)
+        actual_name = user_response_body.get(_name)
+        if expected_name != actual_name:
+            logger.error(f"actual name: {actual_name}, expected name: {expected_name}")
             return False
 
-    if "last_name" in expected:
-        expected_last_name = expected.get("last_name")
-        actual_last_name = user_response_body.get("last_name")
-        if actual_last_name != expected_last_name:
-            logger.error(f"actual last name: {actual_last_name}, expected last name: {expected_last_name}")
+    if _data in expected:
+        expected_data = expected.get(_data)
+        actual_data = user_response_body.get(_data)
+        if actual_data != expected_data:
+            logger.error(f"actual user data: {actual_data}, expected user data: {expected_data}")
             return False
 
     return True

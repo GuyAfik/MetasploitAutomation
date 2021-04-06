@@ -63,21 +63,20 @@ def create_users(request, user_api):
 
 
 @pytest.fixture(scope="function")
-def find_user_response(request, create_users):
+def find_user_response(request, user_api):
     """
     Finds the corresponding user response that was created by user email.
 
     Returns:
         dict: a corresponding user body response, empty dict otherwise.
     """
-    _email = "email"
+    _email, _id = "email", "_id"
     email = request.getfixturevalue(argname=_email)
 
-    for full_new_user_response in create_users:
+    users_body_responses, _ = user_api.get_many()
 
-        new_user_body_response, _ = full_new_user_response
-        logger.info(new_user_body_response)
-        if hash_email(email=email) == new_user_body_response["_id"]:
-            return new_user_body_response
+    for user_body_resp in users_body_responses:
+        if hash_email(email=email) == user_body_resp[_id]:
+            return user_body_resp
 
     return {}

@@ -64,7 +64,8 @@ def user_api(test_client):
                 get_all_users_url (str): the URL to get all the users.
 
             Returns:
-                tuple[dict, int]: a tuple containing the body response as a first arg, and status code as second arg.
+                tuple[list[dict], int]: a tuple containing the body response as a first arg,
+                and status code as second arg.
             """
             logger.info(f"Send GET request, URL: {get_all_users_url}")
 

@@ -73,7 +73,7 @@ class TestCreateUserPostApi(object):
 
             logger.info(f"Verify that the user body response {new_user_body_response} is valid")
             assert is_user_response_body_valid(
-                user_response_body=new_user_body_response,
+                user_response_body=new_user_body_response, data={}
             )
 
             logger.info(f"Verify that status code is {HttpCodes.OK}")
@@ -271,9 +271,11 @@ class TestDeleteUserApi(object):
         )
 
 
+@pytest.mark.usefixtures(create_users.__name__)
 class TestPutUserApi(object):
 
     create_user_body_requests = [config.USER_REQUEST_VALID_1, config.USER_REQUEST_VALID_2]
+    _id, _name, _data = "_id", "name", "data"
 
     @pytest.mark.parametrize(
         ("email", "password", "update_user_body_request"),
@@ -341,3 +343,61 @@ class TestPutUserApi(object):
             f"actual {actual_status_code}, expected {HttpCodes.UNAUTHORIZED}"
         )
 
+    @pytest.mark.parametrize(
+        ("email", "password", "update_user_body_request", "expected_params"),
+        [
+            pytest.param(
+                config.VALID_EMAIL,
+                config.UPDATED_PASSWORD_1,
+                config.UPDATE_USER_PASSWORD_BODY_REQUEST,
+                {},
+                id="Update_user_password"
+            ),
+            pytest.param(
+                config.VALID_EMAIL,
+                config.UPDATED_PASSWORD_1,
+                config.UPDATE_USER_NAME_BODY_REQUEST,
+                {_name: config.UPDATE_USER_NAME_BODY_REQUEST[_name]},
+                id="Update_user's_name"
+            ),
+            pytest.param(
+                config.VALID_EMAIL,
+                config.UPDATED_PASSWORD_1,
+                config.UPDATE_USER_DATA_BODY_REQUEST,
+                {_data: config.UPDATE_USER_DATA_BODY_REQUEST[_data]},
+                id="Update_user_data"
+            ),
+            pytest.param(
+                config.VALID_EMAIL_2,
+                config.UPDATED_PASSWORD_2,
+                config.UPDATE_ALL_USER_PARAMS_BODY_REQUEST,
+                {
+                    _name: config.UPDATE_ALL_USER_PARAMS_BODY_REQUEST[_name],
+                    _data: config.UPDATE_ALL_USER_PARAMS_BODY_REQUEST[_data]
+                },
+                id="Update_all_user_parameters"
+            )
+        ]
+    )
+    def test_update_user_succeed(self, email, password, update_user_body_request, expected_params, user_api):
+        """
+        Tests scenarios where updating a user should succeed.
+        """
+        user_body_response, actual_status_code = user_api.put(email=email, request_body=update_user_body_request)
+
+        logger.info(f"Verify that the PUT body response is an empty string")
+        assert user_body_response == '', f"Failed to update user with username {email} password {password}"
+
+        logger.info(f"Verify that the PUT response status code is {HttpCodes.NO_CONTENT}")
+        assert is_expected_code(actual_code=actual_status_code, expected_code=HttpCodes.NO_CONTENT), (
+            f"actual {actual_status_code}, expected {HttpCodes.NO_CONTENT}"
+        )
+
+        user_body_response_post_update, status_code = user_api.get_one(email=email, password=password)
+        assert status_code != HttpCodes.UNAUTHORIZED, f"Failed to update password {password}"
+
+        for key, val in expected_params.items():
+            logger.info(f"Verify that update {key} to {val} was successful")
+            assert user_body_response_post_update[key] == val, (
+                f"Failed to update {key} to {val}, actual: {user_body_response_post_update[key]}"
+            )

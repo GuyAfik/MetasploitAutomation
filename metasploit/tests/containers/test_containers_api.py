@@ -184,10 +184,8 @@ class TestMetasploitContainerDeleteApi(object):
 
             logger.info(f"delete container {config.INVALID_CONTAINER_ID} from instance {docker_server_id}")
             body_response, actual_status_code = container_api.delete(
-                instance_id=docker_server_id, container_id=config.INVALID_CONTAINER_ID
+                instance_id=docker_server_id, container_id=config.INVALID_CONTAINER_ID, expected_to_fail=True
             )
-            if isinstance(body_response, str):
-                body_response = load_json(string=body_response)
 
             logger.info(f"Verify that DELETE body response {body_response} is an ERROR")
             assert is_error_response_valid(

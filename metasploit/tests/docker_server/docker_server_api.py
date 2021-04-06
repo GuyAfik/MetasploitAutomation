@@ -4,7 +4,8 @@ import pytest
 from metasploit.tests.test_wrapper import BaseApiInterface
 from metasploit.tests.helpers import (
     to_utf8,
-    execute_rest_api_request
+    execute_rest_api_request,
+    convert
 )
 
 from . import config
@@ -73,12 +74,13 @@ def docker_server_api(test_client):
 
             return execute_rest_api_request(url=get_docker_server_url, api_func=self._test_client.get)
 
-        def delete(self, instance_id):
+        def delete(self, instance_id, expected_to_fail=False):
             """
             Sends a DELETE request to delete a docker server instance.
 
             Args:
                 instance_id (str): instance ID.
+                expected_to_fail (bool): True if deleting the instance expects to fail.
 
             Returns:
                 tuple[str, int]: a tuple containing the body response as first arg, and status code as second arg.
@@ -86,8 +88,10 @@ def docker_server_api(test_client):
             delete_docker_server_url = config.DELETE_DOCKER_SERVER_URL.format(instance_id=instance_id)
             logger.info(f"Send DELETE request, URL: {delete_docker_server_url}")
 
+            convert_func = convert if expected_to_fail else to_utf8
+
             return execute_rest_api_request(
-                url=delete_docker_server_url, api_func=self._test_client.delete, convert_func=to_utf8
+                url=delete_docker_server_url, api_func=self._test_client.delete, convert_func=convert_func
             )
 
     return DockerServerApi(test_client=test_client)

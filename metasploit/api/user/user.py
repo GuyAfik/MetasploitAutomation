@@ -2,7 +2,7 @@ import hashlib
 from email_validator import validate_email, EmailNotValidError
 
 from metasploit.api.response import client_user_response, fill_user_document
-from metasploit.api.errors import BadEmailError, BadFirstNameOrLastName, BadPasswordLength
+from metasploit.api.errors import BadEmailError, BadName, BadPasswordLength
 
 
 class User(object):
@@ -28,13 +28,14 @@ class User(object):
         """
         if len(password) < 8:
             raise BadPasswordLength(password=password)
+
         try:
             validate_email(email=email)
         except EmailNotValidError:
             raise BadEmailError(email=email)
 
         if not name.isalpha():
-            raise BadFirstNameOrLastName(name=name)
+            raise BadName(name=name)
 
         self._name = name
         self._email = email
@@ -52,6 +53,8 @@ class User(object):
 
     @name.setter
     def name(self, name):
+        if not name.isalpha():
+            raise BadName(name=name)
         self._name = name
 
     @property
@@ -63,7 +66,9 @@ class User(object):
         return self._password
 
     @password.setter
-    def password(self, password):
+    def password(self, password, length=8):
+        if len(password) < length:
+            raise BadPasswordLength(password=password)
         self._password = password
 
     @property

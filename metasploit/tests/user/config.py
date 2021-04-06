@@ -6,14 +6,32 @@ UPDATE_USER_URL = "/Users/Update/{email}"
 
 VALID_PASSWORD_1 = "123456789"
 VALID_PASSWORD_2 = "Thalyta123"
+UPDATED_PASSWORD_1 = "1234567890"
+UPDATED_PASSWORD_2 = "hello!beautiful"
 INVALID_PASSWORD = "1234"
 VALID_NAME_1 = "Guy"
 VALID_NAME_2 = "Thalyta"
+UPDATED_NAME = "Pnina"
 INVALID_NAME = "Guy123"
 VALID_EMAIL = "guyafik423468@gmail.com"
 VALID_EMAIL_2 = "Thalyta@gmail.com"
 INVALID_EMAIL = "guyafik42@@.com"
 VALID_NON_EXISTING_EMAIL = "blasdf@gmail.com"
+USER_DATA = {
+    "1": "1",
+    "2": "2",
+    "3": {
+        "4": "4",
+        "5": {
+            "6": {
+                "7": {
+
+                }
+            }
+        }
+    },
+    "8": "8"
+}
 
 # Invalid user requests
 USER_REQUEST_WITH_SHORT_PASSWORD = {
@@ -68,3 +86,22 @@ UPDATE_USER_BODY_REQUEST_WITH_FAKE_PARAMS_2 = {
     "3": "3",
     "4": "4"
 }
+
+UPDATE_USER_PASSWORD_BODY_REQUEST = {
+    "password": UPDATED_PASSWORD_1
+}
+
+UPDATE_USER_NAME_BODY_REQUEST = {
+    "name": UPDATED_NAME
+}
+
+UPDATE_USER_DATA_BODY_REQUEST = {
+    "data": USER_DATA
+}
+
+UPDATE_ALL_USER_PARAMS_BODY_REQUEST = {
+    "password": UPDATED_PASSWORD_2,
+    "name": UPDATED_NAME,
+    "data": USER_DATA
+}
+

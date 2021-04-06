@@ -151,7 +151,7 @@ class BadEmailError(ApiException):
         super().__init__(error_msg=err_msg, error_code=error_code)
 
 
-class BadFirstNameOrLastName(ApiException):
+class BadName(ApiException):
 
     def __init__(self, name, error_code=HttpCodes.BAD_REQUEST):
         err_msg = f"name {name} must contain alphabetic characters only!"
