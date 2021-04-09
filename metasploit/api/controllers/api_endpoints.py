@@ -6,8 +6,8 @@ from metasploit.api.metasploit_manager.module_executor import (
     Payload,
     PortScanning
 )
-from metasploit.api.utils.decorators import response_decorator
-from metasploit.api.response import HttpCodes
+from metasploit.api.response import response_decorator
+from metasploit.api.utils.rest_api_utils import HttpCodes
 
 
 class ControllerApi(Resource):

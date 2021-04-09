@@ -11,8 +11,32 @@ from metasploit.api.errors import (
     InvalidHostName,
     HostIsUnreachable
 )
-from metasploit.api.utils.decorators import metasploit_action_verification
+from metasploit.api.utils.rest_api_utils import HttpCodes
+from metasploit.api.errors import (
+    MetasploitActionError
+)
+from metasploit.api.response import payload_info_response, exploit_info_response
 from metasploit.api.utils.helpers import TimeoutSampler
+
+
+def metasploit_action_verification(func):
+    """
+    Verifies that the metasploit actions that are performed are valid.
+
+    Args:
+        func (Function): metasploit function.
+    """
+
+    def wrapper(self, *args, **kwargs):
+        """
+        Catches error of metasploit actions in case there are any.
+        """
+        try:
+            return func(self, *args, **kwargs)
+        except Exception as exc:
+            raise MetasploitActionError(error_msg=str(exc), error_code=HttpCodes.BAD_REQUEST)
+
+    return wrapper
 
 
 class MetasploitModule(object):
@@ -342,19 +366,7 @@ class Exploit(MetasploitModule):
         exploit_name = exploit_name.replace(" ", "/")
         exploit = super().init_module(module_name=exploit_name, module_type=self.type)
 
-        return {
-            "name": exploit.name,
-            "description": exploit.description,
-            "payloads": exploit.payloads,
-            "options": exploit.options,
-            "filledOptions": exploit.runoptions,
-            "requiredOptions": exploit.required,
-            "platform": exploit.platform,
-            "rank": exploit.rank,
-            "privileged": exploit.privileged,
-            "stance": exploit.stance,
-            "references": exploit.references
-        }
+        return exploit_info_response(exploit=exploit)
 
 
 class Payload(MetasploitModule):
@@ -405,17 +417,7 @@ class Payload(MetasploitModule):
         payload_name = payload_name.replace(" ", "/")
         payload = super().init_module(module_name=payload_name, module_type=self.type)
 
-        return {
-            "name": payload.name,
-            "description": payload.description,
-            "options": payload.options,
-            "filledOptions": payload.runoptions,
-            "requiredOptions": payload.required,
-            "platform": payload.platform,
-            "rank": payload.rank,
-            "privileged": payload.privileged,
-            "references": payload.references
-        }
+        return payload_info_response(payload=payload)
 
 
 class PortScanning(MetasploitModule):
@@ -440,39 +442,3 @@ class PortScanning(MetasploitModule):
             open_ports += re.findall(pattern=finding_port_pattern, string=data)
 
         return open_ports
-
-#
-#     @property
-#     def db_nmap_vulnerabilites(self):
-#
-#         console = self.metasploit_connection.host_console
-#
-#         console_busy = True
-#         console.write(command=f'db_nmap -v --script vuln {self.target_host}')
-#
-#         while console_busy:
-#             time.sleep(10)
-#             console_output = console.read()
-#             print(console_output['data'])
-#             if not console_output['busy']:
-#                 self.metasploit_connection.destory_console()
-#                 return console_output['data']
-#         return ""
-#
-#     @property
-#     def local_nmap_show_vulnerabilites(self):
-#
-#         nmap_obj = nmap.PortScanner()
-#         vulnerabilities_found = {}
-#
-#         nmap_script_scan_res = nmap_obj.scan(hosts=self.target_host, arguments='-v --script vuln')
-#
-#         if nmap_script_scan_res['nmap']['scaninfo']['error']:
-#             return {}
-#
-#         for tcp_ports_result in nmap_script_scan_res['scan'][self.target_host]['tcp'].values():
-#             cur_vuln_script_result = tcp_ports_result['script']
-#             for vuln_name, vuln_details in cur_vuln_script_result.items():
-#                 if 'ERROR' not in vuln_details:
-#                     vulnerabilities_found[vuln_name] = global_utils.remove_trailing_spaces(string=vuln_details)
-#         return vulnerabilities_found

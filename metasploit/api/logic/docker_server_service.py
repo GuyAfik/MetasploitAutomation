@@ -4,9 +4,7 @@ from metasploit.api.database import DatabaseOperations, DatabaseCollections
 from metasploit.api.aws.amazon_operations import create_instance
 from metasploit.api.aws import constants as aws_const
 from metasploit.api.aws.amazon_operations import DockerServerInstanceOperations
-from metasploit.api.utils.decorators import (
-    validate_json_request
-)
+from metasploit.api.validation import validate_json_request
 from metasploit.api.response import new_docker_instance_response
 
 

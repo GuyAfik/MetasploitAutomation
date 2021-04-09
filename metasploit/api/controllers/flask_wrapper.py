@@ -2,7 +2,6 @@ from flask_restful import Api, request
 from flask import Flask
 
 from metasploit.api.response import (
-    HttpCodes,
     ErrorResponse
 )
 from .api_endpoints import (
@@ -11,9 +10,7 @@ from .api_endpoints import (
     MetasploitController,
     UserController
 )
-from metasploit.api.utils.helpers import (
-    HttpMethods
-)
+from metasploit.api.utils.rest_api_utils import HttpCodes, HttpMethods
 from metasploit.api.logic.docker_server_service import DockerServerServiceImplementation
 from metasploit.api.logic.container_service import ContainerServiceImplementation
 from metasploit.api.logic.metasploit_service import MetasploitServiceImplementation

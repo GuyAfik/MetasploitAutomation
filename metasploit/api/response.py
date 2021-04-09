@@ -1,20 +1,12 @@
-from flask import jsonify, make_response
+from flask import jsonify, make_response, request
+from metasploit.api.utils.rest_api_utils import HttpCodes
 
-
-class HttpCodes(object):
-    OK = 200
-    CREATED = 201
-    ACCEPTED = 202
-    NO_CONTENT = 204
-    MULTI_STATUS = 207
-    BAD_REQUEST = 400
-    UNAUTHORIZED = 401
-    FORBIDDEN = 403
-    NOT_FOUND = 404
-    METHOD_NOT_ALLOWED = 405
-    DUPLICATE = 409
-    INTERNAL_SERVER_ERROR = 500
-    SERVICE_UNAVAILABLE = 503
+from metasploit.api.errors import (
+    choose_http_error_code,
+    ApiException
+)
+from boto3.exceptions import Boto3Error
+from docker.errors import DockerException
 
 
 class ApiResponse(object):
@@ -159,3 +151,91 @@ def fill_user_document(user):
         "password": user.password,
         "data": user.data
     }
+
+
+def payload_info_response(payload):
+    """
+    Creates a payload response for client.
+
+    Args:
+        payload (Payload): payload object.
+
+    Returns:
+        dict: payload info response.
+    """
+    return {
+        "name": payload.name,
+        "description": payload.description,
+        "options": payload.options,
+        "filledOptions": payload.runoptions,
+        "requiredOptions": payload.required,
+        "platform": payload.platform,
+        "rank": payload.rank,
+        "privileged": payload.privileged,
+        "references": payload.references
+    }
+
+
+def exploit_info_response(exploit):
+    """
+   Creates a exploit response for client.
+
+   Args:
+       exploit (Exploit): exploit object.
+
+   Returns:
+       dict: exploit info response.
+
+    """
+    return {
+       "name": exploit.name,
+       "description": exploit.description,
+       "payloads": exploit.payloads,
+       "options": exploit.options,
+       "filledOptions": exploit.runoptions,
+       "requiredOptions": exploit.required,
+       "platform": exploit.platform,
+       "rank": exploit.rank,
+       "privileged": exploit.privileged,
+       "stance": exploit.stance,
+       "references": exploit.references
+   }
+
+
+def response_decorator(code):
+    """
+    Decorator to execute all the API services implementations and parse a valid response to them.
+
+    Args:
+        code (int): http code that should indicate about success.
+    """
+    def first_wrapper(func):
+        """
+        wrapper to get the service function.
+
+        Args:
+            func (Function): a function object representing the API service function.
+        """
+        def second_wrapper(*args, **kwargs):
+            """
+            Args:
+                args: function args
+                kwargs: function kwargs
+
+            Returns:
+                Response: flask api response.
+            """
+            try:
+                return ApiResponse(response=func(*args, **kwargs), http_status_code=code)()
+            except ApiException as exc:
+                return ErrorResponse(
+                    error_msg=str(exc), http_error_code=exc.error_code, req=request.json, path=request.base_url
+                )()
+            except (Boto3Error, DockerException) as exc:
+                error_code = choose_http_error_code(error=exc)
+                return ErrorResponse(
+                    error_msg=str(exc), http_error_code=error_code, req=request.json, path=request.base_url
+                )()
+
+        return second_wrapper
+    return first_wrapper

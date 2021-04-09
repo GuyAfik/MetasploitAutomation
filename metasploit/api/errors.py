@@ -9,7 +9,7 @@ from docker.errors import (
     APIError,
 )
 
-from .response import HttpCodes
+from metasploit.api.utils.rest_api_utils import HttpCodes
 
 
 class ApiException(Exception):
@@ -24,7 +24,9 @@ class ApiException(Exception):
         super().__init__(error_msg)
 
     def __str__(self):
-
+        """
+        Represent the exception as a string.
+        """
         if self._is_client_error():
             return f"{self.error_code} Client error: {self.error_msg}"
         elif self._is_server_error():
@@ -33,7 +35,9 @@ class ApiException(Exception):
             return 'Unknown error!'
 
     def __repr__(self):
-
+        """
+        Detail information for debugging.
+        """
         if self._is_client_error():
             return f"{self.error_code} Client error: {self.error_msg}"
         elif self._is_server_error():
@@ -42,46 +46,72 @@ class ApiException(Exception):
             return 'Unknown error!'
 
     def _is_client_error(self):
+        """
+        Checks if an error is a client error.
+
+        Returns:
+            bool: True if error is a client error, False otherwise.
+        """
         return 400 <= self.error_code < 500
 
     def _is_server_error(self):
+        """
+        Checks if an error is a server error.
+
+        Returns:
+            bool: True if error is a server error, False otherwise.
+        """
         return 500 <= self.error_code < 600
 
 
 class InvalidHostName(ApiException):
-
+    """
+    Exception class in case a target hostname provided does not exist.
+    """
     def __init__(self, invalid_host, error_code=HttpCodes.BAD_REQUEST):
         msg = f"the host {invalid_host} is invalid and does not exist!"
         super().__init__(error_msg=msg, error_code=error_code)
 
 
 class HostIsUnreachable(ApiException):
+    """
+    Exception class in case a host is not reachable via ping.
+    """
     def __init__(self, source_host, target_host, error_code=HttpCodes.BAD_REQUEST):
         msg = f"Unable to ping from {source_host} to {target_host}, {target_host} is unreachable"
         super().__init__(error_msg=msg, error_code=error_code)
 
 
 class GeneralConnectionError(ApiException):
-
+    """
+    Exception that indicate about any kind of general error exception to a resource.
+    """
     def __init__(self, error_msg, error_code=HttpCodes.SERVICE_UNAVAILABLE):
         super().__init__(error_msg=error_msg, error_code=error_code)
 
 
 class MsfrpcdConnectionError(GeneralConnectionError):
-
+    """
+    Exception that indicate we are unable to connect to the metasploit msfrpcd daemon to make API calls.
+    """
     def __init__(self, host, port, error_code=HttpCodes.SERVICE_UNAVAILABLE):
         error_msg = f"Failed to setup connection to msfrpc daemon at {host} using port {port}"
         super().__init__(error_msg=error_msg, error_code=error_code)
 
 
 class SSHConnectionError(GeneralConnectionError):
+    """
+    Exception that indicate we are unable to connect to the host via SSH.
+    """
     def __init__(self, host, error_code=HttpCodes.SERVICE_UNAVAILABLE):
         error_msg = f"Failed to connect with SSH to {host}"
         super().__init__(error_msg=error_msg, error_code=error_code)
 
 
 class DockerServerConnectionError(GeneralConnectionError):
-
+    """
+    Exception that indicate we are unable to connect to the docker daemon on a host.
+    """
     def __init__(self, docker_server, url, error_code=HttpCodes.SERVICE_UNAVAILABLE):
         error_msg = f"Failed to connect to {docker_server} docker daemon using URL {url}"
         super().__init__(error_msg=error_msg, error_code=error_code)
@@ -108,7 +138,9 @@ class CommandFailureError(ApiException):
 
 
 class ContainerCommandFailure(ApiException):
-
+    """
+    Exception which indicates that a command on the container failed.
+    """
     def __init__(self, error_code, output, cmd, container_id):
         output = output.decode('utf-8')
         msg = f"the following {cmd} failed on container {container_id}, output: {output}"

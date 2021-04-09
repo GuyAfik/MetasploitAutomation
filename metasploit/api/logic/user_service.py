@@ -7,7 +7,7 @@ from metasploit.api.database import DatabaseOperations, DatabaseCollections
 
 from metasploit.api.user.user import User
 from metasploit.api.errors import InvalidUserNameOrPassword
-from metasploit.api.utils.decorators import validate_json_request
+from metasploit.api.validation import validate_json_request
 
 
 class UserServiceImplementation(UserService):
