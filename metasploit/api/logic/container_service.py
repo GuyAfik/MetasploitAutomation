@@ -5,12 +5,39 @@ from metasploit.api.database import (
 )
 from metasploit.api.docker.docker_operations import ContainerOperations
 
-from metasploit.api.utils.decorators import (
-    update_containers_status
-)
-from metasploit.api.response import (
-    create_new_response
-)
+from metasploit.api.aws.amazon_operations import DockerServerInstanceOperations
+from metasploit.api import constants as global_const
+from metasploit.api.response import new_container_response
+
+
+def update_containers_status(func):
+    """
+    Updates containers status in case there is any change with them ( running state ---> stopped state for example)
+    """
+    def wrapper(self, **kwargs):
+        database = self.database
+
+        instance_documents = database.get_all_documents()
+
+        for document in instance_documents:
+            docker_server_instance = DockerServerInstanceOperations(instance_id=document[global_const.ID]).docker_server
+            containers = docker_server_instance.docker.container_collection.list(all=True)
+
+            for container in containers:
+                container.reload()
+                for container_document in document["Containers"]:
+
+                    if container.id == container_document[global_const.ID]:
+                        if container.status != container_document["status"]:
+
+                            database.update_docker_document(
+                                docker_document_type="Container",
+                                docker_document_id=container.id,
+                                update={"Containers.$.status": container.status},
+                                docker_server_id=document[global_const.ID]
+                            )
+        return func(self, **kwargs)
+    return wrapper
 
 
 class ContainerServiceImplementation(ContainerService):
@@ -82,7 +109,7 @@ class ContainerServiceImplementation(ContainerService):
             docker_server_id=instance_id
         ).run_container_with_msfrpcd_metasploit(containers_documents=all_containers_documents)
 
-        container_response = create_new_response(obj=new_container, response_type=self.type)
+        container_response = new_container_response(container=new_container)
 
         self.database.add_docker_document(
             amazon_resource_id=instance_id, docker_document_type=self.type, new_docker_document=container_response

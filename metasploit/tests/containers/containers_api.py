@@ -2,8 +2,7 @@ import logging
 import pytest
 
 from metasploit.tests.test_wrapper import BaseApiInterface
-from metasploit.tests.helpers import to_utf8
-from metasploit.tests.helpers import execute_rest_api_func
+from metasploit.tests.helpers import to_utf8, convert, execute_rest_api_request
 
 from . import config
 logger = logging.getLogger("ContainersApi")
@@ -33,7 +32,7 @@ def container_api(test_client):
             create_msfrpcd_container_url = create_msfrpcd_container_url.format(instance_id=instance_id)
             logger.info(f"Send POST request, URL: {create_msfrpcd_container_url}")
 
-            return execute_rest_api_func(url=create_msfrpcd_container_url, api_func=self._test_client.post)
+            return execute_rest_api_request(url=create_msfrpcd_container_url, api_func=self._test_client.post)
 
         def get_many(self, instance_id):
             """
@@ -49,7 +48,7 @@ def container_api(test_client):
             get_all_containers_url = config.GET_CONTAINERS_URL.format(instance_id=instance_id)
             logger.info(f"Send GET request, URL: {get_all_containers_url}")
 
-            return execute_rest_api_func(url=get_all_containers_url, api_func=self._test_client.get)
+            return execute_rest_api_request(url=get_all_containers_url, api_func=self._test_client.get)
 
         def get_one(self, instance_id, container_id):
             """
@@ -65,15 +64,16 @@ def container_api(test_client):
             get_container_url = config.GET_CONTAINER_URL.format(instance_id=instance_id, container_id=container_id)
             logger.info(f"Send GET request, URL: {get_container_url}")
 
-            return execute_rest_api_func(url=get_container_url, api_func=self._test_client.get)
+            return execute_rest_api_request(url=get_container_url, api_func=self._test_client.get)
 
-        def delete(self, instance_id, container_id):
+        def delete(self, instance_id, container_id, expected_to_fail=False):
             """
             Sends a DELETE request to delete a single container.
 
             Args:
                 instance_id (str): instance ID
                 container_id (str): container ID.
+                expected_to_fail (bool): True if deleting the container expects to fail.
 
             Returns:
                 tuple[str, int]: a tuple containing the body response as first arg, and status code as second arg.
@@ -83,8 +83,10 @@ def container_api(test_client):
             )
             logger.info(f"Send DELETE request, URL: {delete_container_url}")
 
-            return execute_rest_api_func(
-                url=delete_container_url, api_func=self._test_client.delete, convert_func=to_utf8
+            convert_func = convert if expected_to_fail else to_utf8
+
+            return execute_rest_api_request(
+                url=delete_container_url, api_func=self._test_client.delete, convert_func=convert_func
             )
 
     return ContainerApi(test_client=test_client)

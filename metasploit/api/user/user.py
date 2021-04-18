@@ -1,8 +1,8 @@
 import hashlib
 from email_validator import validate_email, EmailNotValidError
 
-from metasploit.api.response import create_new_response, fill_user_document
-from metasploit.api.errors import BadEmailError, BadFirstNameOrLastName, BadPasswordLength
+from metasploit.api.response import client_user_response, fill_user_document
+from metasploit.api.errors import BadEmailError, BadName, BadPasswordLength
 
 
 class User(object):
@@ -10,93 +10,83 @@ class User(object):
     This class represents a user in the API.
 
     Attributes:
-        first_name (str): first name of the user.
-        last_name (str): last name of the user.
         email (str): email address of the user.
-        username (str): user name.
-        _hashed_password (str): the hashed password.
         _id (str): user ID.
 
+
     """
-    def __init__(
-            self,
-            is_hashing_password_required=False,
-            first_name=None,
-            last_name=None,
-            email=None,
-            username=None,
-            password=None,
-            _id=None
-    ):
+    def __init__(self, name=None, email=None, password=None, _id=None, data=None):
         """
         Initializes the user constructor.
 
         Args:
-            is_hashing_password_required (bool): if provided password should be hashed or not.
-            first_name (str): first user name.
-            last_name (str): last user name.
-            username (str): user name.
+            name (str): name of the user.
             email (str): email address of the user.
             password (str): password of the user.
             _id (str): user ID.
+            data (dict): user data.
         """
         if len(password) < 8:
             raise BadPasswordLength(password=password)
+
         try:
             validate_email(email=email)
         except EmailNotValidError:
             raise BadEmailError(email=email)
 
-        if not first_name.isalpha() or not last_name.isalpha():
-            raise BadFirstNameOrLastName(first_name=first_name, last_name=last_name)
+        if not name.isalpha():
+            raise BadName(name=name)
 
-        self._first_name = first_name
-        self._last_name = last_name
+        self._name = name
         self._email = email
-        self._username = username
-        self._hashed_password = hashlib.sha256(
-            password.encode('utf-8')
-        ).hexdigest() if is_hashing_password_required else password
-        self._id = hashlib.sha256(f"{username}".encode('utf-8')).hexdigest() if not _id else _id
+        self._password = password
+        self._data = data if data else {}
+        self._id = hashlib.sha256(f"{email}{email}{email}".encode('utf-8')).hexdigest() if not _id else _id
 
     @property
     def id(self):
         return self._id
 
     @property
-    def first_name(self):
-        return self._first_name
+    def name(self):
+        return self._name
 
-    @property
-    def last_name(self):
-        return self._last_name
+    @name.setter
+    def name(self, name):
+        if not name.isalpha():
+            raise BadName(name=name)
+        self._name = name
 
     @property
     def email(self):
         return self._email
 
     @property
-    def username(self):
-        return self._username
+    def password(self):
+        return self._password
+
+    @password.setter
+    def password(self, password, length=8):
+        if len(password) < length:
+            raise BadPasswordLength(password=password)
+        self._password = password
 
     @property
-    def hashed_password(self):
-        return self._hashed_password
+    def data(self):
+        return self._data
 
-    def compare_passwords(self, password):
-        return self._hashed_password == password
+    @data.setter
+    def data(self, data):
+        self._data = data
 
-    def client_response(self, response_type='User'):
+    def client_response(self):
         """
         Returns a response built for the client.
-
-        Args:
-            response_type (str): response type.
 
         Returns:
             dict: a response meant to be sent for the client.
         """
-        return create_new_response(obj=self, response_type=response_type)
+        return client_user_response(user=self)
 
     def document(self):
         """

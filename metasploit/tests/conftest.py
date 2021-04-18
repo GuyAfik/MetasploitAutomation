@@ -1,7 +1,7 @@
 import pytest
 
 from flask import current_app
-from metasploit.api.controllers import flask_wrapper
+from metasploit.api.controllers.flask_wrapper import application
 
 
 @pytest.fixture(scope="session")
@@ -9,7 +9,7 @@ def test_client():
     """
     Provides a test test_client of flask for all the tests/fixtures.
     """
-    app = flask_wrapper.FlaskAppWrapper().app
+    app = application
     app.config['TESTING'] = True
 
     with app.app_context():

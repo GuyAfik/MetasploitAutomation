@@ -166,10 +166,8 @@ class TestDockerServerDeleteApi(object):
         Tests that given an invalid docker server, DELETE operation fails.
         """
         docker_server_body_response, actual_status_code = docker_server_api.delete(
-            instance_id=config.INVALID_INSTANCE_ID
+            instance_id=config.INVALID_INSTANCE_ID, expected_to_fail=True
         )
-        if isinstance(docker_server_body_response, str):
-            docker_server_body_response = load_json(string=docker_server_body_response)
 
         logger.info(f"Verify that DELETE body response {docker_server_body_response} is an ERROR")
         assert is_error_response_valid(

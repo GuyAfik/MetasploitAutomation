@@ -2,7 +2,7 @@ import logging
 import pytest
 
 from metasploit.tests.test_wrapper import MetasploitApiInterface
-from metasploit.tests.helpers import execute_rest_api_func
+from metasploit.tests.helpers import execute_rest_api_request
 
 from . import config
 
@@ -34,7 +34,7 @@ def metasploit_api(test_client):
             execute_exploit_url = execute_exploit_url.format(instance_id=instance_id)
             logger.info(f"Send POST request, URL: {execute_exploit_url}, REQUEST: {execute_exploit_body_request}")
 
-            return execute_rest_api_func(
+            return execute_rest_api_request(
                 url=execute_exploit_url, api_func=self._test_client.post, request_body=execute_exploit_body_request
             )
 
@@ -53,7 +53,7 @@ def metasploit_api(test_client):
             scan_ports_url = scan_ports_url.format(instance_id=instance_id, target_host=target_host)
             logger.info(f"Send GET request, URL: {scan_ports_url}")
 
-            return execute_rest_api_func(url=scan_ports_url, api_func=self._test_client.get)
+            return execute_rest_api_request(url=scan_ports_url, api_func=self._test_client.get)
 
         def get_exploit(self, instance_id, exploit_name, get_exploit_url=config.GET_EXPLOIT_URL):
             """
@@ -70,7 +70,7 @@ def metasploit_api(test_client):
             get_exploit_url = get_exploit_url.format(instance_id=instance_id, exploit_name=exploit_name)
             logger.info(f"Send GET request, URL: {get_exploit_url}")
 
-            return execute_rest_api_func(url=get_exploit_url, api_func=self._test_client.get)
+            return execute_rest_api_request(url=get_exploit_url, api_func=self._test_client.get)
 
         def get_payload(self, instance_id, payload_name, get_payload_url=config.GET_PAYLOAD_URL):
             """
@@ -87,6 +87,6 @@ def metasploit_api(test_client):
             get_payload_url = get_payload_url.format(instance_id=instance_id, payload_name=payload_name)
             logger.info(f"Send GET request, URL: {get_payload_url}")
 
-            return execute_rest_api_func(url=get_payload_url, api_func=self._test_client.get)
+            return execute_rest_api_request(url=get_payload_url, api_func=self._test_client.get)
 
     return MetasploitApi(test_client=test_client)

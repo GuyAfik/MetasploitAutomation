@@ -1,5 +1,6 @@
 
 import docker
+from docker.errors import DockerException
 
 from metasploit.api.connections import (
     Connection,
@@ -11,6 +12,7 @@ from metasploit.api.errors import (
 )
 from requests.adapters import ConnectionError
 from metasploit.api.aws import constants as aws_const
+from metasploit.api.utils.helpers import recover_containers
 
 
 class Docker(Connection):
@@ -22,7 +24,7 @@ class Docker(Connection):
         _api_client (APIClient): The low level API obj for docker.
     """
 
-    def __init__(self, docker_server_ip, protocol='tcp', docker_port=2375):
+    def __init__(self, docker_server_ip, protocol='tcp', docker_port=2375, max_connection_attempts=5):
         """
         Initialize the connection to the docker server over an AWS ec2 instance using a chosen protocol,
         docker server ip and a port that the docker server listens to.
@@ -31,19 +33,24 @@ class Docker(Connection):
             docker_server_ip (str): the docker server public ip.
             protocol (str): a protocol to use in order to connect to the docker server. etc: tcp/udp.
             docker_port (int): the port that the docker server listens to.
+            max_connection_attempts (int): maximum times to try and connect the docker API.
         """
         base_url = f"{protocol}://{docker_server_ip}:{docker_port}"
 
+        is_docker_daemon_recovered = False
         ssh = None
         connection_attempts = 0
-        while connection_attempts < 5:
+        while connection_attempts < max_connection_attempts:
             try:
+
                 self._docker_client = docker.DockerClient(base_url=base_url)
                 self._api_client = docker.APIClient(base_url=base_url)
 
-                self._docker_client.ping()
-                break
-            except ConnectionError:
+                if self._docker_client.ping():
+                    if is_docker_daemon_recovered:
+                        recover_containers(containers=self._docker_client.containers.list(all=True))
+                    break
+            except (ConnectionError, DockerException):
                 if not ssh:
                     ssh = SSH(hostname=docker_server_ip)
 
@@ -52,8 +59,9 @@ class Docker(Connection):
                     raise CommandFailureError(cmd=cmd, instance_fqdn=docker_server_ip)
 
                 connection_attempts += 1
+                is_docker_daemon_recovered = True
 
-        if connection_attempts >= 5:
+        if connection_attempts >= max_connection_attempts:
             raise DockerServerConnectionError(docker_server=docker_server_ip, url=base_url)
 
     @property

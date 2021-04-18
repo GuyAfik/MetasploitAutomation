@@ -1,13 +1,26 @@
 import time
+import functools
 from metasploit.api import constants as global_constants
 
 from metasploit.api.errors import (
-    BadRequest,
     PortNotFoundError,
-    DuplicateImageError,
     TimeoutExpiredError,
-    InvalidInputTypeError
+    ApiException
 )
+
+
+def singleton(cls):
+    """
+    Make a class a Singleton class (only one instance)
+    """
+    @functools.wraps(cls)
+    def wrapper_singleton(*args, **kwargs):
+        if not wrapper_singleton.instance:
+            wrapper_singleton.instance = cls(*args, **kwargs)
+        return wrapper_singleton.instance
+
+    wrapper_singleton.instance = None
+    return wrapper_singleton
 
 
 def choose_port_for_msfrpcd(containers_document):
@@ -46,70 +59,6 @@ def get_all_used_port_in_instance(containers_document):
         return used_ports
     else:
         return []
-
-
-def check_if_image_already_exists(image_document, tag_to_check):
-    """
-    Check if the image with the specified tag already exists.
-
-    Args:
-        image_document (dict): image document.
-        tag_to_check (str): tag that should be checked.
-
-    Returns:
-        bool: False if the tag was not found.
-
-    Raises:
-        DuplicateImageError: in case there is already the same image available.
-    """
-    for image in image_document:
-        for tag in image['tags']:
-            if tag == tag_to_check:
-                raise DuplicateImageError(resource=tag)
-    return False
-
-
-def validate_request_type(client_request):
-    """
-    Validate the client request type (dict).
-
-    Returns:
-        tuple(bool, str): a tuple that indicates if the request type is ok. (True, 'Success') for a valid request type,
-        otherwise, (False, err)
-    """
-    try:
-        if not isinstance(client_request, dict):
-            return False
-        return True
-    except (BadRequest, TypeError, AttributeError):
-        raise InvalidInputTypeError()
-
-
-def validate_api_request_arguments(api_request, expected_args):
-    """
-    Validates that the api request from the client has valid arguments for the api function that was used.
-
-    Args:
-        api_request (dict): a dictionary that composes the api request from the client.
-        expected_args (list(str)): a list containing all the arguments that should be checked.
-
-    Returns:
-        list: a list with arguments that aren't valid if exists, empty list otherwise
-    """
-    bad_inputs = []
-
-    for expected_arg in expected_args:
-        if expected_arg not in api_request:
-            bad_inputs.append(expected_arg)
-    return bad_inputs
-
-
-class HttpMethods:
-    GET = 'GET'
-    POST = 'POST'
-    PUT = 'PUT'
-    DELETE = 'DELETE'
-    PATCH = 'PATCH'
 
 
 class TimeoutSampler(object):
@@ -159,7 +108,7 @@ class TimeoutSampler(object):
                 raise TimeoutExpiredError(error_msg=f"Timeout occurred sampling {self.func.__name__}")
             time.sleep(self.sleep)
 
-    def iterate_over_func_results(self, result):
+    def iterate(self, result):
         """
         Samples the function and in case the function gets the desired result (True or False).
 
@@ -177,17 +126,27 @@ class TimeoutSampler(object):
             return False
 
 
-def remove_trailing_spaces(string):
+def recover_containers(containers):
     """
-    Removes trailing spaces from a string
+    Recovers all the containers of an instance including metasploit msfrpcd.
 
     Args:
-        string (str): a string to remove spaces from.
+         containers (list[Container]): a list of container objects.
 
-    Returns:
-        str: a string without trailing spaces
+    Raises:
+        ApiException: in case one of the containers was not able to be recovered.
     """
-    if isinstance(string, str):
-        string.replace("\n", "")
-        return "".join(string.split())
-    return ""
+    port = None
+
+    for container in containers:  # start all the containers
+        container.start()
+        container.reload()
+
+        for ports in container.ports.values():
+            for port_configuration in ports:
+                port = port_configuration["HostPort"]
+                if port:
+                    break
+        exit_code, _ = container.exec_run(f"./msfrpcd -P 123456 -S -p {port}")
+        if exit_code:
+            raise ApiException(error_msg=f"Failed recovering container {container.id}", error_code=500)

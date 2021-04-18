@@ -1,7 +1,7 @@
 from metasploit.api.logic.services import MetasploitService
 from metasploit.api.database import DatabaseOperations, DatabaseCollections
 from metasploit.api.aws.amazon_operations import DockerServerInstanceOperations
-from metasploit.api.utils.decorators import validate_json_request
+from metasploit.api.validation import validate_json_request
 
 
 class MetasploitServiceImplementation(MetasploitService):

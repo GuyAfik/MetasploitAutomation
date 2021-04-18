@@ -1,10 +1,8 @@
-import os
 from flask_restful import Api, request
 from flask import Flask
 import flask
 
 from metasploit.api.response import (
-    HttpCodes,
     ErrorResponse
 )
 from .api_endpoints import (
@@ -13,9 +11,7 @@ from .api_endpoints import (
     MetasploitController,
     UserController
 )
-from metasploit.api.utils.helpers import (
-    HttpMethods
-)
+from metasploit.api.utils.rest_api_utils import HttpCodes, HttpMethods
 from metasploit.api.logic.docker_server_service import DockerServerServiceImplementation
 from metasploit.api.logic.container_service import ContainerServiceImplementation
 from metasploit.api.logic.metasploit_service import MetasploitServiceImplementation
@@ -39,6 +35,10 @@ class FlaskAppWrapper(object):
         self._api = Api(app=app)
         self._app = app
         self.add_all_endpoints()
+
+    @property
+    def app(self):
+        return self._app
 
     @application.errorhandler(HttpCodes.NOT_FOUND)
     def invalid_urls_error(self):
@@ -72,7 +72,7 @@ class FlaskAppWrapper(object):
         }
         return ErrorResponse(
             error_msg=err_msg, http_error_code=HttpCodes.BAD_REQUEST, req=request.json, path=request.base_url
-        ).make_response
+        )()
 
 
     @application.errorhandler(HttpCodes.METHOD_NOT_ALLOWED)
@@ -88,7 +88,7 @@ class FlaskAppWrapper(object):
             http_error_code=HttpCodes.METHOD_NOT_ALLOWED,
             req=request.json,
             path=request.base_url
-        ).make_response
+        )()
 
     @application.errorhandler(HttpCodes.BAD_REQUEST)
     def bad_request(self):
@@ -103,7 +103,7 @@ class FlaskAppWrapper(object):
             http_error_code=HttpCodes.BAD_REQUEST,
             req=request.json,
             path=request.base_url
-        ).make_response
+        )()
 
     def get_api(self):
         """
@@ -262,7 +262,15 @@ class FlaskAppWrapper(object):
 
         self._api.add_resource(
             UserController,
-            '/Users/Get/<username>/<password>',
+            '/Users/Update/<email>',
+            endpoint='/Users/Update/<email>',
+            methods=[HttpMethods.PUT],
+            resource_class_kwargs=user_controller_kwargs,
+        )
+
+        self._api.add_resource(
+            UserController,
+            '/Users/Get/<email>/<password>',
             endpoint='/Users/Get/<username>/<password>',
             methods=[HttpMethods.GET],
             resource_class_kwargs=user_controller_kwargs,
@@ -278,8 +286,8 @@ class FlaskAppWrapper(object):
 
         self._api.add_resource(
             UserController,
-            '/Users/Delete/<username>',
-            endpoint='/Users/Delete/<username>',
+            '/Users/Delete/<email>',
+            endpoint='/Users/Delete/<email>',
             methods=[HttpMethods.DELETE],
             resource_class_kwargs=user_controller_kwargs,
         )

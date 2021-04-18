@@ -4,7 +4,7 @@ from metasploit.api.errors import (
     PayloadNotSupportedError,
     MetasploitActionError
 )
-from metasploit.api.response import HttpCodes
+from metasploit.api.utils.rest_api_utils import HttpCodes
 
 
 def check_required_options_for_module(required_params, options, module_name):

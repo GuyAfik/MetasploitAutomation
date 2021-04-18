@@ -72,8 +72,6 @@ class DatabaseOperations(object):
 
         Args:
             user_id (str): user ID.
-            username (str): user name.
-            type (str): resource type in this case (a user).
 
         Returns:
             dict: a user document in case it was found.

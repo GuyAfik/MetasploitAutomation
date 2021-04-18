@@ -1,21 +1,6 @@
 import boto3
-import functools
+from metasploit.api.utils.helpers import singleton
 import os
-
-EC2 = 'ec2'
-
-
-def singleton(cls):
-    """
-    Make a class a Singleton class (only one instance)
-    """
-    @functools.wraps(cls)
-    def wrapper_singleton(*args, **kwargs):
-        if not wrapper_singleton.instance:
-            wrapper_singleton.instance = cls(*args, **kwargs)
-        return wrapper_singleton.instance
-    wrapper_singleton.instance = None
-    return wrapper_singleton
 
 
 @singleton
@@ -32,11 +17,14 @@ class AwsAccess(object):
         https://boto3.amazonaws.com/v1/documentation/api/latest/index.html
         https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html#service-resource
     """
+
+    EC2 = 'ec2'
+
     def __init__(self):
         # For amit's mac
         # os.environ['AWS_DEFAULT_REGION'] = 'us-west-2'
-        self._client = boto3.client(EC2, region_name='us-east-2')
-        self._resource = boto3.resource(EC2, region_name='us-east-2')
+        self._client = boto3.client(self.EC2, region_name='us-east-2')
+        self._resource = boto3.resource(self.EC2, region_name='us-east-2')
         self._session = boto3.Session()
 
     @property
