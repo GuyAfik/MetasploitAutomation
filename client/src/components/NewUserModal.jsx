@@ -17,12 +17,13 @@ const NewUserModal = props => {
 
     const isNewUserValid = () => {
         if (newUser.email === "" || newUser.newPass === "" || newUser.newPassRepeat === "" || newUser.name === "") {
-            return false
-        }
-        if (!isEmailValid()) {
+            setConfirmLoading(false);
+            setAlert({isShown: true, description: 'One of the fields are empty!'});
             return false
         }
         if (newUser.newPass !== newUser.newPassRepeat) {
+            setConfirmLoading(false);
+            setAlert({isShown: true, description: 'Passwords are not identical!'});
             return false
         }
         return true
@@ -30,22 +31,24 @@ const NewUserModal = props => {
 
     const handleOk = () => {
         setConfirmLoading(true);
-        // if (isNewUserValid()) {
+        if (isNewUserValid()) {
             createUser(newUser).then(res => {
-                console.log(res)
-                props.close();
-                setAlert({...alert, isShown: false})
-                setConfirmLoading(false);
-            }).catch(err => {
-                console.log(err)
-                setConfirmLoading(false);
-                setAlert({isShown: true, description: err})
-            });
-        // } else {
-        //     setConfirmLoading(false);
-        //     setAlert({isShown: true, description: 'User is not Valid!'})
-        // }
-    };
+                if (res.ok) {
+                    res.json().then(data => {
+                        console.log(data)
+                        props.close();
+                        setAlert({...alert, isShown: false})
+                        setConfirmLoading(false);
+                    })
+                } else {
+                    res.json().then(err => {
+                        setConfirmLoading(false);
+                        setAlert({isShown: true, description: err.Error.Message})
+                    })
+                }
+            })
+        }
+    }
 
     const handleCancel = () => {
         setAlert({...alert, isShown: false})
@@ -64,7 +67,7 @@ const NewUserModal = props => {
                 <div style={{display: "flex", alignSelf: "center", flexDirection: "column", width: '100%'}}>
                     <Space size={"large"} direction={"vertical"}>
                         <Input size="large" placeholder="Enter your name" prefix={<UserOutlined/>}
-                               onChange={e => setNewUser({...newUser, lastName: e.target.value})}/>
+                               onChange={e => setNewUser({...newUser, name: e.target.value})}/>
                         <Input size="large" placeholder="Enter your email" prefix={<UserOutlined/>}
                                onChange={e => setNewUser({...newUser, email: e.target.value})}/>
                         <Input.Password size="large" placeholder="Enter new password" prefix={<LockOutlined/>}

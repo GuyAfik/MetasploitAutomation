@@ -43,7 +43,10 @@ const LoginPage = props => {
                 history.push('/home');
             }).catch(err => {
                 console.log(err);
-                setAlert({isShown: true, description: "User is not register or the details you provided are incorrect"});
+                setAlert({
+                    isShown: true,
+                    description: "User is not register or the details you provided are incorrect"
+                });
                 setIsLoading(false);
             })
         }

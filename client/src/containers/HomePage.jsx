@@ -21,7 +21,7 @@ const nonEmptyPage = (props) => {
             justifyContent: 'flex-start',
             flexWrap: 'wrap'
         }}>
-            {props.userR.userData.cards.map((card, index) => {
+            {props.userR.data.cards.map((card, index) => {
                 return (
                     <div style={{margin: 10}}>
                         <CustomCard details={card}/>
@@ -47,7 +47,7 @@ const HomePage = (props) => {
                 <Title level={4} style={{color: "#91d5ff", marginLeft: 20}}>Home</Title>
             </div>
             <Divider/>
-            {props.userR.userData.cards.length === 0 ? emptyPage() : nonEmptyPage(props)}
+            {props.userR.data.cards.length === 0 ? emptyPage() : nonEmptyPage(props)}
             <div style={{position: 'fixed', bottom: '40px', right: '40px'}}>
                 <Tooltip title={"Create new PenTest"}>
                     <Button type="primary" shape={'circle'} size={'large'} icon={<PlusOutlined/>} onClick={() => {

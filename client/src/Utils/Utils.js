@@ -6,25 +6,18 @@ export function print(str) {
 }
 
 export function createUser(newUser) {
-    let mockUser = {
-        "first_name": "Guy",
-        "last_name": "Afik",
-        "username": "Great10",
-        "password": "12345678",
-        "email": "guyafik423468@gmail.com"
-    }
-    // return axios.post('/Users/Create', {
-    //     // name: newUser.name,
-    //     // password: newUser.newPass,
-    //     // email: newUser.email
-    //
-    // });
-    return axios.post('/Users/Create', mockUser);
+    return fetch('/Users/Create', {
+        method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
+            name: newUser.name,
+            password: newUser.newPass,
+            email: newUser.email
+        })
+    })
 }
 
 export async function getUser(email, password) {
     let res = await axios.get(`/Users/Get/${email}/${password}`);
-    console.log(`The User is: ${res.data}`);
+    console.log(`The User is: ${JSON.stringify(res.data)}`);
     return res.data;
 }
 
