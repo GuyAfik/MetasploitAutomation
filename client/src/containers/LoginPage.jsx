@@ -38,16 +38,23 @@ const LoginPage = props => {
             setAlert({isShown: true, description: "Password length should be at least 8 characters!"});
             setIsLoading(false);
         } else {
-            getUser(userEmail, userPassword).then(user => {
-                props.startNewSession(user);
-                history.push('/home');
-            }).catch(err => {
-                console.log(err);
-                setAlert({
-                    isShown: true,
-                    description: "User is not register or the details you provided are incorrect"
-                });
-                setIsLoading(false);
+            getUser(userEmail, userPassword).then(res => {
+                if (res.ok) {
+                    res.json().then(user => {
+                        console.log(`The User is: ${JSON.stringify(user)}`);
+                        props.startNewSession(user);
+                        history.push('/home');
+                    })
+                } else {
+                    res.json().then(err => {
+                        console.log(`Error: ${JSON.stringify(err)}`)
+                        setAlert({
+                            isShown: true,
+                            description: `${err.Error.Message}`
+                        });
+                        setIsLoading(false);
+                    })
+                }
             })
         }
     }

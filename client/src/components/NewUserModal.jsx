@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {Alert, Input, Modal, Space} from "antd";
 import {closeNewUserModal} from "../actions/modalsActions";
 import {connect} from "react-redux";
-import {LockOutlined, UserOutlined} from "@ant-design/icons";
+import {LockOutlined, UserOutlined, MailOutlined} from "@ant-design/icons";
 import {createUser, isEmailValid} from "../Utils/Utils";
 
 const NewUserModal = props => {
@@ -68,7 +68,7 @@ const NewUserModal = props => {
                     <Space size={"large"} direction={"vertical"}>
                         <Input size="large" placeholder="Enter your name" prefix={<UserOutlined/>}
                                onChange={e => setNewUser({...newUser, name: e.target.value})}/>
-                        <Input size="large" placeholder="Enter your email" prefix={<UserOutlined/>}
+                        <Input size="large" placeholder="Enter your email" prefix={<MailOutlined />}
                                onChange={e => setNewUser({...newUser, email: e.target.value})}/>
                         <Input.Password size="large" placeholder="Enter new password" prefix={<LockOutlined/>}
                                         onChange={e => setNewUser({...newUser, newPass: e.target.value})}/>
