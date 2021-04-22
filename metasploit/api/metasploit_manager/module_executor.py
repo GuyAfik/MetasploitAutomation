@@ -3,7 +3,7 @@ import time
 import socket
 from icmplib import ping
 
-from metasploit.api.connections import Metasploit
+from metasploit.api.connections import Metasploit, SSH
 from requests.adapters import ConnectionError
 from metasploit.api.errors import (
     MsfrpcdConnectionError,
@@ -15,11 +15,12 @@ from metasploit.api.utils.rest_api_utils import HttpCodes
 from metasploit.api.errors import (
     MetasploitActionError
 )
-from metasploit.api.response import payload_info_response, exploit_info_response
+from metasploit.api.response import payload_info_response, exploit_info_response, auxiliary_info_response
 from metasploit.api.utils.helpers import TimeoutSampler
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 def metasploit_action_verification(func):
     """
@@ -143,6 +144,19 @@ class MetasploitModule(object):
             if "error" not in job_details:
                 return job_details
         return {}
+
+    def stop_job(self, job_id):
+        """
+        Stops a job performed by metasploit.
+
+        Args:
+            job_id (int): job ID.
+
+        Returns:
+            bool: True if job was stopped successfully, False otherwise.
+        """
+        self._metasploit.metasploit_client.jobs.stop(jobid=job_id)
+        return True if str(job_id) not in self._metasploit.metasploit_client.jobs.list else False
 
     def build_module(self, name, options, type='payload'):
         """
@@ -450,3 +464,97 @@ class PortScanning(MetasploitModule):
             open_ports += re.findall(pattern=finding_port_pattern, string=data)
 
         return open_ports
+
+
+class Auxiliary(MetasploitModule):
+
+    type = 'auxiliary'
+
+    def info(self, auxiliary_name):
+        """
+        Gets information about an auxiliary.
+
+        Args:
+            auxiliary_name (str): auxiliary name.
+
+        Returns:
+            dict: information about the auxiliary.
+        """
+        auxiliary_name = auxiliary_name.replace(" ", "/")
+        auxiliary = super().init_module(module_name=auxiliary_name, module_type=self.type)
+
+        return auxiliary_info_response(auxiliary=auxiliary)
+
+    def execute(self, *args, **kwargs):
+        """
+        Executes an auxiliary module.
+        """
+        if kwargs.pop("dos_slowris", None):
+            return self.dos_slowris(**kwargs)
+
+    def dos_slowris(self, name, options, min_timeout=3, max_timeout=5, wait_for_server_timeout=30, sleep=5):
+        """
+        Executes slowris dos attack on a target host (web server).
+
+        Args:
+            name (str): type of slowris attack to use.
+            options (dict): slowris attack options.
+            min_timeout (int): min timeout to get the curl response in seconds.
+            max_timeout (int): max timeout to get the curl response in seconds.
+            wait_for_server_timeout (int): timeout to wait for attacked server to return back to live or crash.
+            sleep (int): sleep sampling between each execution of curl command.
+
+        Returns:
+            dict: response indicating about success or failure of the dos attack.
+
+        Examples:
+
+            {
+                "curl --connect-timeout 3 --max-time 5 172.17.0.3":
+                {
+                    "curl_output": "curl: (28) Operation timed out after 5000 milliseconds with 0 bytes received\n",
+                    "curl_status_code": 28
+                },
+            "success": true
+            }
+        """
+        is_slowris_success_cmd = f"curl --connect-timeout {min_timeout} --max-time {max_timeout} {self._target_host}"
+        auxiliary = self.build_module(name=name, options=options, type=self.type)
+        job = auxiliary.execute()
+
+        result = {}
+
+        job_id = job['job_id']
+        job_info = self.job_info(job_id=job_id)
+        if job_info:
+
+            try:
+                ssh = SSH(hostname=self._source_host)
+
+                for is_success, commands in TimeoutSampler(
+                    timeout=wait_for_server_timeout,
+                    sleep=sleep,
+                    func=ssh.execute_commands,
+                    commands=[is_slowris_success_cmd]
+                ):
+                    if not is_success:  # means we managed to make server crash
+
+                        slowries_cmd_command_res = commands[0]
+                        all_lines = [line for line in slowries_cmd_command_res[is_slowris_success_cmd][2]]
+                        result['success'] = True
+                        info = {
+                            "curl_status_code": slowries_cmd_command_res[is_slowris_success_cmd][0],
+                            "curl_output": all_lines[-1]
+                        }
+                        result[is_slowris_success_cmd] = info
+                        break
+
+                if not self.stop_job(job_id=job_id):
+                    raise MetasploitActionError(
+                        error_msg=f"unable to stop job {job_info}", error_code=HttpCodes.INTERNAL_SERVER_ERROR
+                    )
+
+            except TimeoutExpiredError:
+                pass
+
+        return result if result else {"success": False}

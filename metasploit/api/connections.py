@@ -111,18 +111,21 @@ class SSH(Connection):
             timeout (int): command channel timeout.
 
         Returns:
-            bool: True if all the commands were successful, False if one of the commands failed.
+            tuple[bool, list[dict]]: True if all the commands were successful, otherwise False and a dict consists
+                of command as a key, and (command code, stdout, stderr).
 
         Raises:
             SSHException: in case the SSH server fails to execute the command.
         """
+        commands_results = []
         try:
             for command in commands:
                 stdin, stdout, stderr = self.get_client().exec_command(command=command, timeout=timeout)
                 exit_cmd_status = stdout.channel.recv_exit_status()
+                commands_results.append({command: (exit_cmd_status, stdout.readlines(), stderr.readlines())})
                 if exit_cmd_status:  # means the command was not successful - similar to echo $?
-                    return False, command
-            return True, 'Success'
+                    return False, commands_results
+            return True, commands_results
         except SSHException:
             raise SSHConnectionError(host=self._hostname)
 

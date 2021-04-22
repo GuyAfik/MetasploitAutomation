@@ -178,7 +178,7 @@ def payload_info_response(payload):
 
 def exploit_info_response(exploit):
     """
-   Creates a exploit response for client.
+    Creates a exploit response for client.
 
    Args:
        exploit (Exploit): exploit object.
@@ -200,6 +200,29 @@ def exploit_info_response(exploit):
        "stance": exploit.stance,
        "references": exploit.references
    }
+
+
+def auxiliary_info_response(auxiliary):
+    """
+    Creates a exploit response for client.
+
+    Args:
+        auxiliary (Auxiliary): auxiliary object.
+
+   Returns:
+       dict: auxiliary info response.
+    """
+    return {
+        "name": auxiliary.name,
+        "description": auxiliary.description,
+        "options": auxiliary.options,
+        "filledOptions": auxiliary.runoptions,
+        "requiredOptions": auxiliary.required,
+        "rank": auxiliary.rank,
+        "privileged": auxiliary.privileged,
+        "stance": auxiliary.stance,
+        "references": auxiliary.references
+    }
 
 
 def response_decorator(code):
