@@ -17,7 +17,9 @@ from metasploit.api.errors import (
 )
 from metasploit.api.response import payload_info_response, exploit_info_response
 from metasploit.api.utils.helpers import TimeoutSampler
+import logging
 
+logger = logging.getLogger(__name__)
 
 def metasploit_action_verification(func):
     """
@@ -59,9 +61,9 @@ class MetasploitModule(object):
         try:
             if target:
                 self._target_host = socket.gethostbyname(target)
-                is_target_reachable = ping(address=self._target_host, privileged=False).is_alive
-                if not is_target_reachable:
-                    raise HostIsUnreachable(source_host=self._source_host, target_host=self._target_host)
+                # is_target_reachable = ping(address=self._target_host, privileged=False).is_alive
+                # if not is_target_reachable:
+                #     raise HostIsUnreachable(source_host=self._source_host, target_host=self._target_host)
         except socket.gaierror:
             raise InvalidHostName(invalid_host=target)
 
@@ -140,7 +142,6 @@ class MetasploitModule(object):
             job_details = self._metasploit.metasploit_client.jobs.info(jobid=job_id)
             if "error" not in job_details:
                 return job_details
-            return {}
         return {}
 
     def build_module(self, name, options, type='payload'):
@@ -236,11 +237,16 @@ class Exploit(MetasploitModule):
         ]
         """
         exploit = self.build_module(name=name, options=options, type=self.type)
+        # logger.info(f"exploit name: {exploit.name}")
+        # logger.info(f"exploit RHOSTS: {exploit['RHOSTS']}")
         successful_payloads = []
 
         for payload_name, payload_options in payloads.items():
             payload = self.build_module(name=payload_name, options=payload_options)
+            # logger.info(f"key: {payload_name}")
+            # logger.info(f"value: {payload_options}")
             exploit_job = exploit.execute(payload=payload)
+            # logger.info(f"exploit job {exploit_job}")
             job_id = exploit_job["job_id"]
 
             time.sleep(7)
@@ -266,6 +272,7 @@ class Exploit(MetasploitModule):
         """
         payload_details = {}
         commands = ["hostname", "whoami"]
+        # logger.info(f"sessions: {self._metasploit.metasploit_client.sessions.list}")
 
         for session_id, session_details in self._metasploit.metasploit_client.sessions.list.items():
             if exploit_name in session_details['via_exploit'] and payload_name in session_details['via_payload']:
@@ -275,6 +282,7 @@ class Exploit(MetasploitModule):
                     payload_details[cmd] = output
 
         job_details = self.job_info(job_id=job_id)
+        # logger.info(f"Job details: {self._metasploit.metasploit_client.jobs.info(jobid=str(job_id))}")
         if job_details:
             payload_details["job"] = job_details
         if payload_details:
