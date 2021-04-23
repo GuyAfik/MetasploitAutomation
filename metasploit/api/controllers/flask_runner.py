@@ -1,19 +1,18 @@
 from .flask_wrapper import flask_wrapper
 
-from metasploit.api.connections import Metasploit
-# from metasploit.api.metasploit_manager.module_executor import Auxiliary
+# from metasploit.api.metasploit_manager.module_executor import Auxiliary, Exploit
 #
 #
 # def results(test_client, uuid):
 #     return test_client.call('module.results', [uuid])
 #
-# source_host = '18.189.7.230'
+# source_host = '18.190.159.190'
 # # m = Metasploit(server=source_host, port=50000)
 #
 # target_host = '172.17.0.3'
-# name = 'dos/http/slowloris'
-# options = {'rhost': target_host}
-# m = Auxiliary(source_host=source_host, target=target_host)
+# name = 'unix/irc/unreal_ircd_3281_backdoor'
+# options = {'RHOSTS': target_host}
+# m = Exploit(source_host=source_host, target=target_host)
 # result = []
 # for e in m.exploits[360:500]:
 #     try:
