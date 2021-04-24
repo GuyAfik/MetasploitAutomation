@@ -132,3 +132,33 @@ def is_payload_name_response_valid(payload_details_response_body):
         )
         return False
     return True
+
+
+def is_execute_exploit_response_valid(execute_exploit_body_response):
+    """
+    Validates whether an exploit execution body response is valid.
+
+    Args:
+        execute_exploit_body_response (dict): the response body of the exploit execution.
+
+    Returns:
+        bool: True if the response is valid, False otherwise.
+    """
+    if "session" not in execute_exploit_body_response:
+        logger.error(
+            f"There is no session key in the exploit execution details response body {execute_exploit_body_response}"
+        )
+        return False
+
+    if "hostname" not in execute_exploit_body_response:
+        logger.error(
+            f"There is no hostname key in the exploit execution details response body {execute_exploit_body_response}"
+        )
+        return False
+
+    if "whoami" not in execute_exploit_body_response:
+        logger.error(
+            f"There is no whoami key in the exploit execution details response body {execute_exploit_body_response}"
+        )
+        return False
+    return True

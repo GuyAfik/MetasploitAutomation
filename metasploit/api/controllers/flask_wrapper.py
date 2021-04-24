@@ -244,6 +244,22 @@ class FlaskAppWrapper(object):
             resource_class_kwargs=metasploit_controller_kwargs,
         )
 
+        self._api.add_resource(
+            MetasploitController,
+            '/DockerServerInstances/<instance_id>/Metasploit/<auxiliary_name>/AuxiliaryInfo',
+            endpoint='/DockerServerInstances/<instance_id>/Metasploit/<auxiliary_name>/AuxiliaryInfo',
+            methods=[HttpMethods.GET],
+            resource_class_kwargs=metasploit_controller_kwargs,
+        )
+
+        self._api.add_resource(
+            MetasploitController,
+            '/DockerServerInstances/<instance_id>/Metasploit/<target>/RunAuxiliary',
+            endpoint='/DockerServerInstances/<instance_id>/Metasploit/<target>/RunAuxiliary',
+            methods=[HttpMethods.POST],
+            resource_class_kwargs=metasploit_controller_kwargs,
+        )
+
     def _add_user_endpoints(self):
         """
         Add all endpoints that are related to user operations.

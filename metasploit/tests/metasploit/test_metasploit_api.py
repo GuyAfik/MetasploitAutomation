@@ -23,7 +23,8 @@ from ..containers.containers_api import container_api  # noqa: F401
 
 from . import config
 from .metasploit_api import metasploit_api  # noqa: F401
-from .helpers import is_exploit_name_response_valid, is_payload_name_response_valid
+from .helpers import is_exploit_name_response_valid, is_payload_name_response_valid, is_execute_exploit_response_valid
+from .fixtures import create_metasploitable_server, fill_exploit_body_request  # noqa: F401
 
 
 logger = logging.getLogger("MetasploitTests")
@@ -289,3 +290,44 @@ class TestGetPayloadApi(object):
             )
 
 
+@pytest.mark.usefixtures(
+    create_containers.__name__
+)
+class TestExecuteMetasploitApi(object):
+
+    @pytest.mark.parametrize(
+        "exploit_body_request",
+        [
+            pytest.param(
+                config.UNIX_FTP_BACKDOOR_EXPLOIT_DETAILS,
+                id="test_exploit_execution_of_unix_ftp_backdoor_to_metasploitable"
+            )
+        ]
+    )
+    def test_execute_exploit_succeed(
+        self,
+        exploit_body_request,
+        fill_exploit_body_request,
+        create_metasploitable_server,
+        metasploit_api
+    ):
+        """
+        Tests scenarios where executing an exploit on metasploitable is expected to succeed and get details from it.
+        """
+        docker_server_id, metasploitable_ip = create_metasploitable_server
+
+        response_body, actual_status_code = metasploit_api.run_exploit(
+            instance_id=docker_server_id,
+            target=metasploitable_ip,
+            execute_exploit_body_request=fill_exploit_body_request
+        )
+
+        logger.info(f"Verify that {response_body} is valid")
+        assert is_execute_exploit_response_valid(execute_exploit_body_response=response_body), (
+            f"execute exploit response {response_body} is not valid"
+        )
+
+        logger.info(f"Verify the status code is {HttpCodes.OK}")
+        assert is_expected_code(actual_code=actual_status_code), (
+            f"actual {actual_status_code}, expected {HttpCodes.OK}"
+        )

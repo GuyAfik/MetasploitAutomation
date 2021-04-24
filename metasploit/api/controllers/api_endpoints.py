@@ -4,7 +4,8 @@ from metasploit.api.logic.servicewrapper import ServiceWrapper
 from metasploit.api.metasploit_manager.module_executor import (
     Exploit,
     Payload,
-    PortScanning
+    PortScanning,
+    Auxiliary
 )
 from metasploit.api.response import response_decorator
 from metasploit.api.utils.rest_api_utils import HttpCodes
@@ -307,15 +308,20 @@ class MetasploitController(ControllerApi):
         self._metasploit_service_implementation = metasploit_service_implementation
 
     def post(self, instance_id, target):
-        return self._run_exploit(instance_id=instance_id, target=target)
+        if 'RunExploit' in request.url_rule.rule:
+            return self._run_exploit(instance_id=instance_id, target=target)
+        elif 'RunAuxiliary' in request.url_rule.rule:
+            return self._run_auxiliary(instance_id=instance_id, target=target)
 
-    def get(self, instance_id, target=None, exploit_name=None, payload_name=None):
+    def get(self, instance_id, target=None, exploit_name=None, payload_name=None, auxiliary_name=None):
         if target:
             return self._scan_ports(instance_id=instance_id, target=target)
         elif exploit_name:
             return self._exploit_info(instance_id=instance_id, exploit_name=exploit_name)
-        else:
+        elif payload_name:
             return self._payload_info(instance_id=instance_id, payload_name=payload_name)
+        else:
+            return self._auxiliary_info(instance_id=instance_id, auxiliary_name=auxiliary_name)
 
     @response_decorator(HttpCodes.OK)
     def _run_exploit(self, instance_id, target):
@@ -334,7 +340,26 @@ class MetasploitController(ControllerApi):
             module=Exploit,
             instance_id=instance_id,
             target=target
-        ).run(exploit_request=request.json)
+        ).run(exploit_request=request.json, is_exploit=True)
+
+    @response_decorator(HttpCodes.OK)
+    def _run_auxiliary(self, instance_id, target):
+        """
+        Runs an exploit on a container that belongs to the instance on a target host endpoint.
+
+        Args:
+            instance_id (str): instance ID.
+            target (str): target host to run the exploit (dns/IP).
+
+        Returns:
+            Response: a flask response.
+       """
+        return ServiceWrapper(
+            class_type=self._metasploit_service_implementation,
+            module=Auxiliary,
+            instance_id=instance_id,
+            target=target
+        ).run(auxiliary_request=request.json, is_auxiliary=True)
 
     @response_decorator(HttpCodes.OK)
     def _scan_ports(self, instance_id, target):
@@ -390,6 +415,24 @@ class MetasploitController(ControllerApi):
             module=Payload,
             instance_id=instance_id
         ).info(payload_name=payload_name)
+
+    @response_decorator(HttpCodes.OK)
+    def _auxiliary_info(self, instance_id, auxiliary_name):
+        """
+        Gets payload information endpoint.
+
+        Args:
+            instance_id (str): instance ID.
+            auxiliary_name (str): auxiliary name to query.
+
+         Returns:
+            Response: a flask response.
+        """
+        return ServiceWrapper(
+            class_type=self._metasploit_service_implementation,
+            module=Auxiliary,
+            instance_id=instance_id
+        ).info(auxiliary_name=auxiliary_name)
 
 # class DockerImagesController(ControllerApi):
 #

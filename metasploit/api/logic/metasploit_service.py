@@ -22,8 +22,11 @@ class MetasploitServiceImplementation(MetasploitService):
         self.docker_sever = DockerServerInstanceOperations(instance_id=instance_id).docker_server
         self.module = module(source_host=self.docker_sever.public_ip_address, *args, **kwargs)
 
-    def run(self, *args, **kwargs):
-        return self.run_exploit(*args, **kwargs)
+    def run(self, is_exploit=False, is_auxiliary=False, *args, **kwargs):
+        if is_exploit:
+            return self.run_exploit(*args, **kwargs)
+        elif is_auxiliary:
+            return self.run_auxiliary(*args, **kwargs)
 
     def info(self, *args, **kwargs):
         """
@@ -63,3 +66,29 @@ class MetasploitServiceImplementation(MetasploitService):
             self.database.add_metasploit_document(
                 amazon_resource_id=self.docker_sever.instance_id, metasploit_document=exploit_details)
         return exploit_results
+
+    def run_auxiliary(self, auxiliary_request):
+        """
+        Runs auxiliary request.
+
+        Args:
+            auxiliary_request (dict): auxiliary body request.
+
+        Returns:
+            dict: auxiliary body response.
+        """
+        if auxiliary_request.get("name") == 'dos/http/slowloris':
+            return self.run_dos_attack(**auxiliary_request)
+
+    @validate_json_request("name", "options")
+    def run_dos_attack(self, **dos_body_request):
+        """
+        Executes slowris (dos) attack against a target host.
+
+        Args:
+            dos_body_request (dict): dos body request details from the client.
+
+        Returns:
+            dict: information in case the slowring dos attack was successful, dict indicating about failure otherwise.
+        """
+        return self.module.execute(dos_slowris=True, **dos_body_request)

@@ -1,6 +1,6 @@
 
 
-EXECUTE_EXPLOIT_URL = "/DockerServerInstances/{instance_id}/Containers/CreateMetasploitContainer"
+EXECUTE_EXPLOIT_URL = "/DockerServerInstances/{instance_id}/Metasploit/{target}/RunExploit"
 SCAN_PORTS_URL = "/DockerServerInstances/{instance_id}/Metasploit/{target_host}/ScanOpenPorts"
 GET_EXPLOIT_URL = "/DockerServerInstances/{instance_id}/Metasploit/{exploit_name}/ExploitInfo"
 GET_PAYLOAD_URL = "/DockerServerInstances/{instance_id}/Metasploit/{payload_name}/PayloadInfo"
@@ -31,3 +31,12 @@ VALID_PAYLOAD_NAME_1 = "windows meterpreter reverse_tcp"
 VALID_PAYLOAD_NAME_2 = "cmd unix interact"
 VALID_PAYLOAD_NAME_3 = "generic shell_reverse_tcp"
 
+UNIX_FTP_BACKDOOR_EXPLOIT_DETAILS = {
+    "name": "unix/ftp/vsftpd_234_backdoor",
+    "payloads": {
+        "cmd/unix/interact": {}
+    },
+    "options": {
+        "RHOSTS": "{target}"
+    }
+}

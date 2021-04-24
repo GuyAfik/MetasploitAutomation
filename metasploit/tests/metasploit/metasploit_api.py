@@ -19,19 +19,22 @@ def metasploit_api(test_client):
     """
     class MetasploitApi(MetasploitApiInterface):
 
-        def post(self, instance_id, execute_exploit_body_request, execute_exploit_url=config.EXECUTE_EXPLOIT_URL):
+        def run_exploit(
+            self, instance_id, target, execute_exploit_body_request, execute_exploit_url=config.EXECUTE_EXPLOIT_URL
+        ):
             """
             Sends a POST request in order to run an exploit.
 
             Args:
                 instance_id (str): instance ID.
+                target (str): target IP/DNS.
                 execute_exploit_body_request (dict): a body request to run an exploit.
                 execute_exploit_url (str): the url to run the exploit.
 
             Returns:
                 tuple[dict, int]: a tuple containing the body response as a first arg, and status code as second arg.
             """
-            execute_exploit_url = execute_exploit_url.format(instance_id=instance_id)
+            execute_exploit_url = execute_exploit_url.format(instance_id=instance_id, target=target)
             logger.info(f"Send POST request, URL: {execute_exploit_url}, REQUEST: {execute_exploit_body_request}")
 
             return execute_rest_api_request(

@@ -56,7 +56,10 @@ class ContainerService(Service):
 
 class MetasploitService(Service):
 
-    def run_exploit(self, instance_id, exploit_request, target):
+    def run_exploit(self, exploit_request):
+        pass
+
+    def run_dos_attack(self, dos_body_request):
         pass
 
 

