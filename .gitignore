@@ -1,0 +1,7 @@
+default_key_pair_name.pem
+vulscan/
+notes
+# python
+*.pyc
+.idea
+virtual_env/
