@@ -5,3 +5,6 @@ notes
 *.pyc
 .idea
 virtual_env/
+client/
+static/
+venv/
