@@ -14,5 +14,5 @@ static
 templates
 
 venv
-
+default_key_pair_name.pem
 
