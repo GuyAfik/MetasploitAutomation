@@ -5,20 +5,10 @@ import {useHistory} from "react-router-dom";
 import {openNewUserModal} from "../actions/modalsActions";
 import NewUserModal from "../components/NewUserModal";
 import {connect} from "react-redux";
-import {newSession} from "../actions/userActions";
+import {newSession, saveEmail} from "../actions/userActions";
 import {getUser, isEmailValid} from '../Utils/Utils';
-import Handler from "../handler/Handler";
 
 const LoginPage = props => {
-    // let i = new Handler();
-    // i.setAge(20);
-    // i.printAge();
-    //
-    // let j = new Handler();
-    // j.setAge(30);
-    // j.printAge();
-    //
-    // i.printAge();
 
     const history = useHistory();
     const [alert, setAlert] = useState({isShown: false, description: ""});
@@ -41,8 +31,8 @@ const LoginPage = props => {
             getUser(userEmail, userPassword).then(res => {
                 if (res.ok) {
                     res.json().then(user => {
-                        console.log(`The User is: ${JSON.stringify(user)}`);
                         props.startNewSession(user);
+                        props.saveEmail(userEmail);
                         history.push('/home');
                     })
                 } else {
@@ -111,6 +101,9 @@ const mapDispatchToProps = (dispatch) => {
         },
         startNewSession: (user) => {
             dispatch(newSession(user))
+        },
+        saveEmail: (email) => {
+            dispatch(saveEmail(email))
         }
     };
 }

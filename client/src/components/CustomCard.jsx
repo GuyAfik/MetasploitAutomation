@@ -1,15 +1,16 @@
 import React from "react";
 import {Card, Grid, Icon} from 'semantic-ui-react';
 import Text from "antd/lib/typography/Text";
-import {LoadingOutlined} from '@ant-design/icons';
+import {LoadingOutlined, CheckOutlined} from '@ant-design/icons';
 import {Tooltip} from 'antd';
 import {openCardModal} from "../actions/modalsActions";
 import {connect} from "react-redux";
 
 
 const CustomCard = (props) => {
-// details: {name:"", ip:"", exploit:"", description:""}
+// details: {name:"", ip:"", exploit:"", description:"", status:""}
     const {details} = props;
+
 
     return (
         <Tooltip title={details.description}>
@@ -33,8 +34,11 @@ const CustomCard = (props) => {
                             {details.exploit}
                         </Grid.Row>
                         <Grid.Row>
-                            <LoadingOutlined style={{marginLeft: 10, marginRight: 10, fontSize: 20}}/>
-                            working...
+                            {details.status !== "finished" ?
+                                <LoadingOutlined style={{marginLeft: 10, marginRight: 10, fontSize: 20}}/> :
+                                <CheckOutlined style={{marginLeft: 10, marginRight: 10, fontSize: 20}}/>
+                            }
+                            {details.status}
                         </Grid.Row>
                     </Grid>
                 </Card.Content>

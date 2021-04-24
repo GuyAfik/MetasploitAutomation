@@ -1,5 +1,6 @@
 const user = {};
 
+
 const userReducer = (state = user, action) => {
     switch (action.type) {
         case "ADD_CARD":
@@ -13,6 +14,22 @@ const userReducer = (state = user, action) => {
             if (!state.data.cards) {
                 state = {...state, data: {cards: []}}
             }
+            break;
+        case "SAVE_EMAIL":
+            state = {
+                ...state,
+                email: action.payload
+            }
+            break;
+        case "UPDATE_CARD":
+            let newCard = action.payload;
+            state = {
+                ...state,
+                data: {
+                    cards: state.data.cards.map((card, i) => card.id === newCard.id ? {...card = newCard} : card)
+                }
+            }
+            break;
         default:
             break;
     }

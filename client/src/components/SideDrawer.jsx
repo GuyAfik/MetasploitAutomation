@@ -1,33 +1,119 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Drawer, Form, Button, Col, Row, Input, Select, Result} from 'antd';
 import {connect} from 'react-redux';
 import {closeSideDrawer} from "../actions/sideDrawerActions";
-import {addCard} from "../actions/userActions";
+import {addCard, updateCard} from "../actions/userActions";
+import {updateUser} from "../Utils/Utils";
+import ApiRequestsHandler from "../handler/ApiRequestsHandler";
 
 const {Option} = Select;
 
+/**
+ * DONT pay attention! just for boilerplate!
+ * @returns {JSX.Element}
+ * @constructor
+ */
+const PortsScanningFields = () => {
+    return (<Row gutter={16}>
+        <Col span={12}>
+            <Form.Item
+                name="name"
+                label="Name"
+                rules={[{required: true, message: 'Name can\'t be empty!',}]}
+            >
+                <Input placeholder="Give your pentest a name"/>
+            </Form.Item>
+        </Col>
+        <Col span={12}>
+            <Form.Item
+                name="ipAddress"
+                label="Target IP address"
+                rules={[{required: true, message: 'IP Address can\'t be empty!'}]}
+            >
+                <Input placeholder="Please enter ip address"/>
+            </Form.Item>
+        </Col>
+    </Row>);
+}
+
+const SqlInjectionFields = () => {
+    return (null);
+}
+
+const DdosFields = () => {
+    return (null);
+}
+
+const renderSwitch = (exploit) => {
+    switch (exploit) {
+        case "ports scanning":
+            return PortsScanningFields();
+        case "Ddos":
+            return DdosFields();
+        case "sql injection":
+            return SqlInjectionFields();
+        default:
+            return null;
+
+    }
+}
+
 const SideDrawer = (props) => {
-    const [newCard, setNewCard] = useState({name: "", ip: "", exploit: "", description: ""});
+    const [newCard, setNewCard] = useState({
+        id: "",
+        name: "",
+        ip: "",
+        exploit: "",
+        description: "",
+        status: "starting..."
+    });
     const [createFailed, setCreateFailed] = useState(false);
+    const [updateFailed, setUpdateFailed] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
+
+    /**
+     * Saves and creates new card only after the uid is set as state.
+     */
+    useEffect(() => {
+        if (newCard.id !== "") {
+            let handler = new ApiRequestsHandler(props.updateCard, newCard);
+            handler.startTest();
+            let user = props.userR;
+            user = {...user, data: {cards: [...user.data.cards, newCard]}};
+            updateUser(user.email, user).then(res => {
+                if (res.ok) {
+                    setLoading(false);
+                    props.addCard(newCard);
+                    handleOnClose();
+                } else {
+                    setLoading(false);
+                    setUpdateFailed(true);
+                }
+            })
+        }
+    }, [newCard.id])
 
     const handleOnClose = () => {
         props.close();
+        setUpdateFailed(false)
         setCreateFailed(false);
-        setNewCard({name: "", ip: "", exploit: "", description: ""});
+        setNewCard({id: "", name: "", ip: "", exploit: "", description: "", status: "starting..."});
         form.resetFields();
     }
 
     const handleOnSubmit = () => {
+        setUpdateFailed(false)
+        setCreateFailed(false);
+        setLoading(true);
         if (newCard.name !== "" && newCard.ip !== "" && newCard.exploit !== "") {
-            props.addCard(newCard)
-            console.log(newCard);
-            handleOnClose();
+            setNewCard({...newCard, id: Date.now()});
         } else {
+            setLoading(false);
             setCreateFailed(true);
         }
-
     }
+
 
     return (
         <>
@@ -71,12 +157,13 @@ const SideDrawer = (props) => {
                                 <Select onChange={value => setNewCard({...newCard, exploit: value})}
                                         placeholder="Please select an exploit">
                                     <Option value="Ddos">Ddos</Option>
-                                    <Option value="ip spoofing">IP Spoofing</Option>
-                                    <Option value="man in the middle">Man in the middle</Option>
+                                    <Option value="sql injection">SQL Injection</Option>
+                                    <Option value="ports scanning">Ports scanning</Option>
                                 </Select>
                             </Form.Item>
                         </Col>
                     </Row>
+                    {renderSwitch(newCard.exploit)}
                     <Row gutter={16}>
                         <Col span={24}>
                             <Form.Item
@@ -102,10 +189,15 @@ const SideDrawer = (props) => {
                                 title="Oppss..."
                                 subTitle="Please check the required fileds are filled before resubmitting."
                             /> : null}
+                            {updateFailed ? <Result
+                                status="500"
+                                title="Something went wrong"
+                                subTitle="The operation on the server side could not be completed. Please try again later."
+                            /> : null}
                         </div>
                         <Form.Item>
                             <div style={{position: "fixed", bottom: '20px', right: '20px'}}>
-                                <Button type="primary" htmlType="submit" onClick={handleOnSubmit}
+                                <Button type="primary" htmlType="submit" loading={loading} onClick={handleOnSubmit}
                                         style={{marginRight: 8}}>
                                     Create
                                 </Button>
@@ -124,7 +216,8 @@ const SideDrawer = (props) => {
 
 const mapStateToProps = (state) => {
     return {
-        sideDrawerR: state.sideDrawerReducer
+        sideDrawerR: state.sideDrawerReducer,
+        userR: state.userReducer
     };
 }
 
@@ -135,6 +228,9 @@ const mapDispatchToProps = (dispatch) => {
         },
         addCard: (card) => {
             dispatch(addCard(card))
+        },
+        updateCard: (card) => {
+            dispatch(updateCard(card))
         }
     };
 }

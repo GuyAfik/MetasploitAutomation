@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import {Button, Typography, Divider, Empty, Tooltip} from 'antd';
 import {connect} from "react-redux";
 import {addCard} from "../actions/userActions";
