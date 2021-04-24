@@ -1,15 +1,17 @@
 class ApiRequestsHandler {
-    constructor(method, penTest) {
-        this._pentest = penTest;
-        this.updateCard = method;
+    constructor(updateCard, penTestCard) {
+        this._penTestCard = penTestCard;
+        this._updateCard = updateCard;
     }
 
     startTest() {
+        //simulate api request
         setTimeout(() => {
-            let u1 = this._pentest;
+            let u1 = this._penTestCard;
             u1 = {...u1, status: 'finished'};
-            this.updateCard(u1);
-        }, 7000);
+            this._updateCard(u1);
+
+        }, 3000);
     }
 }
 

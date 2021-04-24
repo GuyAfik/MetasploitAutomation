@@ -1,3 +1,5 @@
+import {updateUser} from "../Utils/Utils";
+
 const user = {};
 
 
@@ -29,6 +31,13 @@ const userReducer = (state = user, action) => {
                     cards: state.data.cards.map((card, i) => card.id === newCard.id ? {...card = newCard} : card)
                 }
             }
+            updateUser(state.email, state).then(res => {
+                if (res.ok) {
+                    console.log("user updated on server");
+                } else {
+                    console.log("user didnt update on server");
+                }
+            })
             break;
         default:
             break;

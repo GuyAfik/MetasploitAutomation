@@ -77,14 +77,14 @@ const SideDrawer = (props) => {
      */
     useEffect(() => {
         if (newCard.id !== "") {
-            let handler = new ApiRequestsHandler(props.updateCard, newCard);
-            handler.startTest();
             let user = props.userR;
             user = {...user, data: {cards: [...user.data.cards, newCard]}};
             updateUser(user.email, user).then(res => {
                 if (res.ok) {
-                    setLoading(false);
                     props.addCard(newCard);
+                    setLoading(false);
+                    let handler = new ApiRequestsHandler(props.updateCard, newCard);
+                    handler.startTest();
                     handleOnClose();
                 } else {
                     setLoading(false);
