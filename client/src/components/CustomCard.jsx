@@ -1,15 +1,41 @@
 import React from "react";
 import {Card, Grid, Icon} from 'semantic-ui-react';
 import Text from "antd/lib/typography/Text";
-import {LoadingOutlined, CheckOutlined} from '@ant-design/icons';
+import {LoadingOutlined, CheckOutlined, CloseOutlined} from '@ant-design/icons';
 import {Tooltip} from 'antd';
 import {openCardModal} from "../actions/modalsActions";
 import {connect} from "react-redux";
 
 
 const CustomCard = (props) => {
-// details: {name:"", ip:"", exploit:"", description:"", status:""}
+// details: {name:"", ip:"", exploit:"", description:"", status: {state: "", description: ""}}
     const {details} = props;
+
+
+    const getStatusElement = () => {
+        if (details.status.state == "Finished") {
+            return (
+                <div style={{display: 'flex', flexDirection: 'row', marginLeft: -12, marginTop: 10, marginBottom: 10}}>
+                    <CheckOutlined style={{marginLeft: 10, marginRight: 10, fontSize: 20}}/>
+                    <Text type="success" style={{width: 140, marginLeft: -3}}
+                          ellipsis={{tooltip: `${details.status.description}`}}>{details.status.description}</Text>
+                </div>)
+        } else if (details.status.state == "Failed") {
+            return (
+                <div style={{display: 'flex', flexDirection: 'row', marginLeft: -12, marginTop: 10, marginBottom: 10}}>
+                    <CloseOutlined style={{marginLeft: 10, marginRight: 10, fontSize: 20}}/>
+                    <Text type="danger" style={{width: 140, marginLeft: -3}}
+                          ellipsis={{tooltip: `${details.status.description}`}}>{details.status.description}</Text>
+                </div>)
+        } else {
+            return (
+                <div style={{display: 'flex', flexDirection: 'row', marginLeft: -12, marginTop: 10, marginBottom: 10}}>
+                    <LoadingOutlined style={{marginLeft: 10, marginRight: 10, fontSize: 20}}/>
+                    <Text type="secondary" style={{width: 140, marginLeft: -3}}
+                          ellipsis={{tooltip: `${details.status.description}`}}>{details.status.description}</Text>
+                </div>)
+        }
+    }
 
 
     return (
@@ -33,13 +59,7 @@ const CustomCard = (props) => {
                             < Icon style={{marginLeft: 10}} size={"large"} name='user secret'/>
                             {details.exploit}
                         </Grid.Row>
-                        <Grid.Row>
-                            {details.status !== "finished" ?
-                                <LoadingOutlined style={{marginLeft: 10, marginRight: 10, fontSize: 20}}/> :
-                                <CheckOutlined style={{marginLeft: 10, marginRight: 10, fontSize: 20}}/>
-                            }
-                            {details.status}
-                        </Grid.Row>
+                        {getStatusElement()}
                     </Grid>
                 </Card.Content>
             </Card>

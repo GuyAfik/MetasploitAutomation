@@ -65,7 +65,7 @@ const SideDrawer = (props) => {
         ip: "",
         exploit: "",
         description: "",
-        status: "starting..."
+        status: {state: "", description: ""}
     });
     const [createFailed, setCreateFailed] = useState(false);
     const [updateFailed, setUpdateFailed] = useState(false);
@@ -98,7 +98,7 @@ const SideDrawer = (props) => {
         props.close();
         setUpdateFailed(false)
         setCreateFailed(false);
-        setNewCard({id: "", name: "", ip: "", exploit: "", description: "", status: "starting..."});
+        setNewCard({id: "", name: "", ip: "", exploit: "", description: "", status: {state: "", description: ""}});
         form.resetFields();
     }
 

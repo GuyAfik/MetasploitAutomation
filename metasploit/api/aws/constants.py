@@ -7,7 +7,7 @@ DEFAULT_SECURITY_GROUP_ID = 'sg-0cde419d7de10fff7'
 DEFAULT_CPU_TYPE = 't2.micro'
 DEFAULT_IMAGE_ID = 'ami-016b213e65284e9c9'
 DEFAULT_PAIR_KEY_NAME = 'default_key_pair_name'
-DEFAULT_PRIVATE_KEY_PATH = '/home/gafik/MetasploitAutomation/default_key_pair_name.pem'
+DEFAULT_PRIVATE_KEY_PATH = '/Users/amitkremer/Desktop/לימודים/פרוייקט גמר/CODE/server/MetasploitAutomation/default_key_pair_name.pem'
 DEFAULT_MAX_MIN_COUNT = 1
 
 
