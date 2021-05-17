@@ -51,7 +51,7 @@ class ApiRequestsHandler {
      */
     FTPAttack() {
         this.updatePenTestStatus({state: "running", description: "Run FTP attack"});
-        ftpAttack(this._penTestCard.ip, instance._id, this._penTestCard.exploit, this._penTestCard.payload).then(ftpAttackResult => {
+        ftpAttack(this._penTestCard.ip, this._instanceId, this._penTestCard.exploit, this._penTestCard.payload).then(ftpAttackResult => {
             ftpAttackResult.json().then(ftpAttackResult => {
                 this.updatePenTestStatus({
                     state: "Finished",

@@ -15,7 +15,7 @@ const ContainerCard = (props) => {
             <Card.Content>
                 <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                     < Icon style={{alignSelf: 'center'}} size={"huge"} name='docker'/>
-                    <Text style={{alignSelf: 'center'}}>{details._id}</Text>
+                    <Text style={{alignSelf: 'center'}}>{details.name}</Text>
                 </div>
             </Card.Content>
             <Card.Content extra>
@@ -23,12 +23,18 @@ const ContainerCard = (props) => {
                     width: '100%'
                 }}>
                     <Grid.Row>
-                        < Icon style={{marginLeft: 10}} size={"large"} name='computer'/>
-                        {details.IpParameters}
+                        < Icon style={{marginLeft: 10}} size={"large"} name='microchip'/>
+                        {details.image[0]}
                     </Grid.Row>
+                    {Object.keys(details.ports).map(port => {
+                        return (<Grid.Row>
+                            < Icon style={{marginLeft: 10}} size={"large"} name='shield alternate'/>
+                            {port}
+                        </Grid.Row>)
+                    })}
                     <Grid.Row>
                         < Icon style={{marginLeft: 10}} size={"large"} name='heartbeat'/>
-                        {details.State.Name}
+                        {details.status}
                     </Grid.Row>
                 </Grid>
             </Card.Content>

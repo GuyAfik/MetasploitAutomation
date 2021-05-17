@@ -39,9 +39,9 @@ const renderContainersArray = (array) => {
                 {array.map((card, index) => {
                     return (
                         <div style={{margin: 10}}>
-                            {/*<ContainerCard details={card}/>*/}
-                            <ContainerCard
-                                details={{_id: '123456789', IpParameters: '111111', State: {Name: 'amittt'}}}/>
+                            <ContainerCard details={card}/>
+                            {/*<ContainerCard*/}
+                            {/*    details={{_id: '123456789', IpParameters: '111111', State: {Name: 'amittt'}}}/>*/}
                         </div>
                     )
                 })}
@@ -82,7 +82,7 @@ const AWSPage = (props) => {
             setIsLoading(false);
         }
         return (() => {
-            props.removeEc2("i-0cc3a1a18dcf4bf0b");
+            props.removeEc2("i-0686975845f04f50b");
         });
     }, []);
 

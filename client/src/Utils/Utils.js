@@ -160,17 +160,17 @@ export function scanPorts(target, instanceId) {
 }
 
 export function dDosAttack() {
-    return fetch(`/DockerServerInstances/${instanceId}/Metasploit/${target}/ScanOpenPorts`, {
-        method: 'GET'
-    }).then(res => {
-        if (res.ok) {
-            return res
-        } else {
-            throw new Error();
-        }
-    }).catch(err => {
-        throw new Error(err);
-    })
+    // return fetch(`/DockerServerInstances/${instanceId}/Metasploit/${target}/ScanOpenPorts`, {
+    //     method: 'GET'
+    // }).then(res => {
+    //     if (res.ok) {
+    //         return res
+    //     } else {
+    //         throw new Error();
+    //     }
+    // }).catch(err => {
+    //     throw new Error(err);
+    // })
 }
 
 export function ftpAttack(target, instanceId, exploit, payload) {

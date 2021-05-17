@@ -63,7 +63,7 @@ const emptyPage = () => {
 
 const HomePage = (props) => {
     useEffect(() => {
-        // props.addEc2("i-0cc3a1a18dcf4bf0b")
+        props.addEc2("i-0686975845f04f50b")
     }, []);
 
     return (
