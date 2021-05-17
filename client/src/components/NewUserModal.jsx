@@ -15,6 +15,10 @@ const NewUserModal = props => {
         newPassRepeat: ""
     });
 
+    /**
+     * basic validation for the new user details. checks if the fields are empty and if the passwords are match
+     * @returns {boolean}
+     */
     const isNewUserValid = () => {
         if (newUser.email === "" || newUser.newPass === "" || newUser.newPassRepeat === "" || newUser.name === "") {
             setConfirmLoading(false);
@@ -28,7 +32,9 @@ const NewUserModal = props => {
         }
         return true
     }
-
+    /**
+     * creates new user in the users database
+     */
     const handleOk = () => {
         setConfirmLoading(true);
         if (isNewUserValid()) {
@@ -68,7 +74,7 @@ const NewUserModal = props => {
                     <Space size={"large"} direction={"vertical"}>
                         <Input size="large" placeholder="Enter your name" prefix={<UserOutlined/>}
                                onChange={e => setNewUser({...newUser, name: e.target.value})}/>
-                        <Input size="large" placeholder="Enter your email" prefix={<MailOutlined />}
+                        <Input size="large" placeholder="Enter your email" prefix={<MailOutlined/>}
                                onChange={e => setNewUser({...newUser, email: e.target.value})}/>
                         <Input.Password size="large" placeholder="Enter new password" prefix={<LockOutlined/>}
                                         onChange={e => setNewUser({...newUser, newPass: e.target.value})}/>

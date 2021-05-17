@@ -6,13 +6,20 @@ import ContainerCard from "../components/ContainerCard";
 import {getContainersByInstance} from "../Utils/Utils";
 
 const {Title} = Typography;
-
+/**
+ * renders login animation
+ * @returns {JSX.Element}
+ */
 const renderLoading = () => {
     return (<div style={{height: '80vh', width: '100%', display: "flex", justifyContent: "center"}}>
         <Spin style={{alignSelf: "center"}} size="large" tip={"Loading..."}/>
     </div>);
 }
-
+/**
+ * gets array of json containers and renders them to the screen. if the array is empty will return empty icon
+ * @param array - json array of containers
+ * @returns {JSX.Element}
+ */
 const renderContainersArray = (array) => {
     if (array.length === 0) {
         return (
@@ -46,6 +53,9 @@ const AWSPage = (props) => {
     const [ec2Array, setEc2Array] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
+    /**
+     * fetches container's details from server. runs over the ec2 id array and asks for containers data.
+     */
     useEffect(() => {
         setIsLoading(true);
         if (props.awsR.ec2Instances.length !== 0) {

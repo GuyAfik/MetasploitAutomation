@@ -13,7 +13,15 @@ const {Option} = Select;
 const DdosFields = () => {
     return (null);
 }
-
+/**
+ * ftp attack component in the side drawer. rendered only if the user chose FTP Attack from the scan type drop down.
+ * @param exploit - name of the exploit
+ * @param payload - name of the payload
+ * @param setExploitForPenTest - set state method for the exploit
+ * @param setPayloadForPenTest - set state method for the payload
+ * @returns {JSX.Element}
+ * @constructor
+ */
 const FTPAttackFields = (exploit, payload, setExploitForPenTest, setPayloadForPenTest) => {
 
     const handleExploitChanged = (exploit) => {
@@ -53,7 +61,15 @@ const FTPAttackFields = (exploit, payload, setExploitForPenTest, setPayloadForPe
         </Col>
     </Row>);
 }
-
+/**
+ * renders scan type component according to the user choise
+ * @param scanType
+ * @param exploit
+ * @param payload
+ * @param setExploitForPenTest
+ * @param setPayloadForPenTest
+ * @returns {JSX.Element|null|*}
+ */
 const renderSwitch = (scanType, exploit, payload, setExploitForPenTest, setPayloadForPenTest) => {
     switch (scanType) {
         case "ports scanning":
@@ -68,6 +84,12 @@ const renderSwitch = (scanType, exploit, payload, setExploitForPenTest, setPaylo
     }
 }
 
+/**
+ * side drawer component
+ * @param props
+ * @returns {JSX.Element}
+ * @constructor
+ */
 const SideDrawer = (props) => {
     const [createFailed, setCreateFailed] = useState(false);
     const [exploit, setExploit] = useState(PAYLOADS[EXPLOITS[0]]);
@@ -110,6 +132,9 @@ const SideDrawer = (props) => {
         }
     }, [newCard.id])
 
+    /**
+     * triggers when the user close the side drawer. reset the pentest details
+     */
     const handleOnClose = () => {
         props.close();
         setUpdateFailed(false)
@@ -127,6 +152,9 @@ const SideDrawer = (props) => {
         form.resetFields();
     }
 
+    /**
+     * triggers after the user clicks "create". saves the new pentest details in state
+     */
     const handleOnSubmit = () => {
         setUpdateFailed(false)
         setCreateFailed(false);

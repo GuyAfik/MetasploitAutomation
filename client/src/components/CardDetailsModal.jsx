@@ -5,6 +5,29 @@ import {connect} from "react-redux";
 import ReactJson from 'react-json-view'
 import {Page, Text, View, Document, StyleSheet, PDFDownloadLink} from '@react-pdf/renderer';
 
+/**
+ * generates PDF component in a modal for the user. this is NOT what the user will download because the library
+ * cannot generate pdf with the json viewer
+ * @param card - json card
+ *  {
+                "description": "Just a dummy test",
+                "endTime": "12:48",
+                "scanType": "ports scanning",
+                "id": 1620386259941,
+                "ip": "195.95.193.250",
+                "name": "ynet",
+                "results": [
+                    "195.95.193.250:80",
+                    "195.95.193.250:443"
+                ],
+                "startTime": "12:23",
+                "status": {
+                    "description": "Finished",
+                    "state": "Finished"
+                }
+            }
+ * @returns {JSX.Element}
+ */
 const presentationReport = (card) => {
     return (<Document>
         <Page size="A4" style={styles.body}>
@@ -35,6 +58,28 @@ const presentationReport = (card) => {
 
 };
 
+/**
+ * generates PDF file for the user to download. the test result will be saved as a stringify json
+ * @param card - json card
+ *  {
+                "description": "Just a dummy test",
+                "endTime": "12:48",
+                "scanType": "ports scanning",
+                "id": 1620386259941,
+                "ip": "195.95.193.250",
+                "name": "ynet",
+                "results": [
+                    "195.95.193.250:80",
+                    "195.95.193.250:443"
+                ],
+                "startTime": "12:23",
+                "status": {
+                    "description": "Finished",
+                    "state": "Finished"
+                }
+            }
+ * @returns {JSX.Element}
+ */
 const downloadingReport = (card) => {
         return (<Document>
             <Page size="A4" style={styles.body}>

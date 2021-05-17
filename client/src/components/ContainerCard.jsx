@@ -2,6 +2,12 @@ import React from 'react';
 import {Card, Grid, Icon} from "semantic-ui-react";
 import Text from "antd/lib/typography/Text";
 
+/**
+ * Card for presenting containers to the user.
+ * @param props - new container details
+ * @returns {JSX.Element}
+ * @constructor
+ */
 const ContainerCard = (props) => {
     const {details} = props;
     return (

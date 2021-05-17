@@ -25,6 +25,11 @@ const styles = StyleSheet.create({
 });
 const {Title} = Typography;
 
+/**
+ * renders home page with user data: if he has previous pentests, it will render them.
+ * @param props
+ * @returns {JSX.Element}
+ */
 const nonEmptyPage = (props) => {
     return (
         <div style={{
@@ -44,7 +49,10 @@ const nonEmptyPage = (props) => {
             })}
         </div>);
 }
-
+/**
+ * renders empty icon to the home page if the user has no pentest results
+ * @returns {JSX.Element}
+ */
 const emptyPage = () => {
     return (
         <div style={{height: '80vh', width: '100%', display: "flex", justifyContent: "center"}}>
@@ -55,7 +63,7 @@ const emptyPage = () => {
 
 const HomePage = (props) => {
     useEffect(() => {
-        props.addEc2("i-0cc3a1a18dcf4bf0b")
+        // props.addEc2("i-0cc3a1a18dcf4bf0b")
     }, []);
 
     return (

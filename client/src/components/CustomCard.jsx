@@ -7,11 +7,20 @@ import {openCardModal} from "../actions/modalsActions";
 import {connect} from "react-redux";
 
 
+/**
+ * Card for presenting pentest to the user.
+ * @param props - new pentest details
+ * @returns {JSX.Element}
+ * @constructor
+ */
 const CustomCard = (props) => {
-// details: {name:"", ip:"", scanType:"", description:"", status: {state: "", description: ""}}
+// details: {name:"", ip:"", scanType:"", description:"", status: {state: "", description: ""}, startTime: "", endTime: ""}
     const {details} = props;
 
-
+    /**
+     * renders the scan description according to the status in different colors
+     * @returns {JSX.Element}
+     */
     const getStatusElement = () => {
         if (details.status.state == "Finished") {
             return (
