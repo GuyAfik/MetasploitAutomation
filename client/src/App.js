@@ -5,8 +5,7 @@ import TopBar from "./components/TopBar";
 import HomePage from "./containers/HomePage";
 import {BrowserRouter as Router, Switch, Route, Link} from "react-router-dom";
 import AWSPage from "./containers/AWSPage";
-import {AmazonOutlined, DropboxOutlined, HomeOutlined, MoreOutlined} from "@ant-design/icons";
-import DockerPage from "./containers/DockerPage";
+import {AmazonOutlined, HomeOutlined} from "@ant-design/icons";
 import LoginPage from "./containers/LoginPage";
 
 
@@ -35,9 +34,9 @@ export function App() {
                                     <Menu.Item key="1" icon={<HomeOutlined/>}><Link to={'/home'}>Home</Link></Menu.Item>
                                     <Menu.Item key="2" icon={<AmazonOutlined/>}><Link
                                         to={'/aws'}>AWS</Link></Menu.Item>
-                                    <Menu.Item key="3" icon={<DropboxOutlined/>}><Link
-                                        to={'/metasploit'}>Metasploit Details</Link></Menu.Item>
-                                    <Menu.Item key="4" icon={<MoreOutlined/>}>More</Menu.Item>
+                                    {/*<Menu.Item key="3" icon={<DropboxOutlined/>}><Link*/}
+                                    {/*    to={'/metasploit'}>Metasploit Details</Link></Menu.Item>*/}
+                                    {/*<Menu.Item key="4" icon={<MoreOutlined/>}>More</Menu.Item>*/}
                                 </Menu.ItemGroup>
                             </Menu>
 
@@ -49,9 +48,6 @@ export function App() {
                                 </Route>
                                 <Route path="/aws">
                                     <AWSPage/>
-                                </Route>
-                                <Route path="/metasploit">
-                                    <DockerPage/>
                                 </Route>
                             </Row>
                         </Col>

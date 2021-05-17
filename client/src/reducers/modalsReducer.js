@@ -5,7 +5,12 @@ const initialState = {
         cardDetails: {}
     }
 }
-
+/**
+ * reducer the handles the state of the card report.
+ * @param state - open or close, the the card details to display
+ * @param action
+ * @returns {{newUserModal: {isOpen: boolean}, cardModal: {isOpen: boolean, cardDetails: {}}}}
+ */
 const modalsReducer = (state = initialState, action) => {
     switch (action.type) {
         case "OPEN":
@@ -33,6 +38,7 @@ const modalsReducer = (state = initialState, action) => {
             state = {
                 ...state,
                 cardModal: {
+                    ...state.cardModal,
                     isOpen: false
                 }
             }

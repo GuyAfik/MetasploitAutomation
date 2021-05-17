@@ -2,7 +2,37 @@ import {updateUser} from "../Utils/Utils";
 
 const user = {};
 
-
+/**
+ * a reducer that handles all of the user related states.
+ * @param state - the user state at a given time.
+ * {
+    "_id": "a6bf706080b7333846578b028ad45d25a7a4d4cde9fc6c604e8a1995217bdc8c",
+    "data": {
+        "cards": [
+           {
+                "description": "Just a dummy test",
+                "endTime": "12:48",
+                "scanType": "ports scanning",
+                "id": 1620386259941,
+                "ip": "195.95.193.250",
+                "name": "test",
+                "results": [
+                    "195.95.193.250:80",
+                    "195.95.193.250:443"
+                ],
+                "startTime": "12:23",
+                "status": {
+                    "description": "Finished",
+                    "state": "Finished"
+                }
+            }
+        ]
+    },
+    "name": "Amit"
+}
+ * @param action - action that changes the state
+ * @returns {{}}
+ */
 const userReducer = (state = user, action) => {
     switch (action.type) {
         case "ADD_CARD":

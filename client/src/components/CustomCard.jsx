@@ -8,7 +8,7 @@ import {connect} from "react-redux";
 
 
 const CustomCard = (props) => {
-// details: {name:"", ip:"", exploit:"", description:"", status: {state: "", description: ""}}
+// details: {name:"", ip:"", scanType:"", description:"", status: {state: "", description: ""}}
     const {details} = props;
 
 
@@ -40,7 +40,9 @@ const CustomCard = (props) => {
 
     return (
         <Tooltip title={details.description}>
-            <Card raised={true} style={{width: 190}} onClick={() => props.openCardModal(details)}>
+            <Card raised={true} style={{width: 190}} onClick={() => {
+                props.openCardModal(details)
+            }}>
                 <Card.Content>
                     <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                         < Icon style={{alignSelf: 'center'}} size={"huge"} name='laptop'/>
@@ -57,7 +59,7 @@ const CustomCard = (props) => {
                         </Grid.Row>
                         <Grid.Row>
                             < Icon style={{marginLeft: 10}} size={"large"} name='user secret'/>
-                            {details.exploit}
+                            {details.scanType}
                         </Grid.Row>
                         {getStatusElement()}
                     </Grid>

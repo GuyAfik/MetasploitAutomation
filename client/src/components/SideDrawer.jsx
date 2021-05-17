@@ -3,55 +3,65 @@ import {Drawer, Form, Button, Col, Row, Input, Select, Result} from 'antd';
 import {connect} from 'react-redux';
 import {closeSideDrawer} from "../actions/sideDrawerActions";
 import {addCard, updateCard} from "../actions/userActions";
-import {updateUser} from "../Utils/Utils";
+import {getCurrentTime, updateUser} from "../Utils/Utils";
 import ApiRequestsHandler from "../handler/ApiRequestsHandler";
+import {addEC2, removeEC2} from "../actions/awsActions";
+import {EXPLOITS, PAYLOADS} from "../Utils/Constants";
 
 const {Option} = Select;
-
-/**
- * DONT pay attention! just for boilerplate!
- * @returns {JSX.Element}
- * @constructor
- */
-const PortsScanningFields = () => {
-    return (<Row gutter={16}>
-        <Col span={12}>
-            <Form.Item
-                name="name"
-                label="Name"
-                rules={[{required: true, message: 'Name can\'t be empty!',}]}
-            >
-                <Input placeholder="Give your pentest a name"/>
-            </Form.Item>
-        </Col>
-        <Col span={12}>
-            <Form.Item
-                name="ipAddress"
-                label="Target IP address"
-                rules={[{required: true, message: 'IP Address can\'t be empty!'}]}
-            >
-                <Input placeholder="Please enter ip address"/>
-            </Form.Item>
-        </Col>
-    </Row>);
-}
-
-const SqlInjectionFields = () => {
-    return (null);
-}
 
 const DdosFields = () => {
     return (null);
 }
 
-const renderSwitch = (exploit) => {
-    switch (exploit) {
+const FTPAttackFields = (exploit, payload, setExploitForPenTest, setPayloadForPenTest) => {
+
+    const handleExploitChanged = (exploit) => {
+        setExploitForPenTest(exploit)
+    }
+
+    const handlePayloadChanged = (payload) => {
+        setPayloadForPenTest(payload)
+    }
+
+    return (<Row gutter={16}>
+        <Col span={12}>
+            <Form.Item
+                name="exploit"
+                label="Exploit"
+                rules={[{required: true, message: 'Exploit can\'t be empty!',}]}
+            >
+                <Select onChange={exploit => handleExploitChanged(exploit)} defaultValue={EXPLOITS[0]}>
+                    {EXPLOITS.map(exploit => {
+                        return <Option value={exploit}>{exploit}</Option>
+                    })}
+                </Select>
+            </Form.Item>
+        </Col>
+        <Col span={12}>
+            <Form.Item
+                name="payload"
+                label="Payload"
+                rules={[{required: true, message: 'Payload can\'t be empty!',}]}
+            >
+                <Select onChange={payload => handlePayloadChanged(payload)} value={payload}>
+                    {exploit.map(payload => {
+                        return <Option value={payload}>{payload}</Option>
+                    })}
+                </Select>
+            </Form.Item>
+        </Col>
+    </Row>);
+}
+
+const renderSwitch = (scanType, exploit, payload, setExploitForPenTest, setPayloadForPenTest) => {
+    switch (scanType) {
         case "ports scanning":
-            return PortsScanningFields();
+            return null;
         case "Ddos":
             return DdosFields();
-        case "sql injection":
-            return SqlInjectionFields();
+        case "ftp attack":
+            return FTPAttackFields(exploit, payload, setExploitForPenTest, setPayloadForPenTest);
         default:
             return null;
 
@@ -59,17 +69,23 @@ const renderSwitch = (exploit) => {
 }
 
 const SideDrawer = (props) => {
+    const [createFailed, setCreateFailed] = useState(false);
+    const [exploit, setExploit] = useState(PAYLOADS[EXPLOITS[0]]);
+    const [payload, setPayload] = useState(PAYLOADS[EXPLOITS[0]][0]);
+    const [updateFailed, setUpdateFailed] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [newCard, setNewCard] = useState({
+        startTime: "",
+        endTime: "",
         id: "",
         name: "",
         ip: "",
-        exploit: "",
+        scanType: "",
         description: "",
-        status: {state: "", description: ""}
+        status: {state: "", description: ""},
+        exploit: exploit,
+        payload: payload
     });
-    const [createFailed, setCreateFailed] = useState(false);
-    const [updateFailed, setUpdateFailed] = useState(false);
-    const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
 
     /**
@@ -83,7 +99,7 @@ const SideDrawer = (props) => {
                 if (res.ok) {
                     props.addCard(newCard);
                     setLoading(false);
-                    let handler = new ApiRequestsHandler(props.updateCard, newCard);
+                    let handler = new ApiRequestsHandler(props.updateCard, newCard, props.addEc2, props.removeEc2);
                     handler.startTest();
                     handleOnClose();
                 } else {
@@ -98,7 +114,16 @@ const SideDrawer = (props) => {
         props.close();
         setUpdateFailed(false)
         setCreateFailed(false);
-        setNewCard({id: "", name: "", ip: "", exploit: "", description: "", status: {state: "", description: ""}});
+        setNewCard({
+            id: "",
+            name: "",
+            ip: "",
+            scanType: "",
+            description: "",
+            status: {state: "", description: ""},
+            exploit: exploit,
+            payload: payload
+        });
         form.resetFields();
     }
 
@@ -106,12 +131,23 @@ const SideDrawer = (props) => {
         setUpdateFailed(false)
         setCreateFailed(false);
         setLoading(true);
-        if (newCard.name !== "" && newCard.ip !== "" && newCard.exploit !== "") {
-            setNewCard({...newCard, id: Date.now()});
+        if (newCard.name !== "" && newCard.ip !== "" && newCard.scanType !== "") {
+            setNewCard({...newCard, id: Date.now(), startTime: getCurrentTime()});
         } else {
             setLoading(false);
             setCreateFailed(true);
         }
+    }
+
+    const setExploitForPenTest = (exploit) => {
+        setExploit(PAYLOADS[exploit]);
+        setPayload(PAYLOADS[exploit][0])
+        setNewCard({...newCard, exploit: exploit});
+    }
+
+    const setPayloadForPenTest = (payload) => {
+        setPayload(payload)
+        setNewCard({...newCard, payload: payload});
     }
 
 
@@ -150,20 +186,20 @@ const SideDrawer = (props) => {
                     <Row gutter={16}>
                         <Col span={12}>
                             <Form.Item
-                                name="exploit"
-                                label="Exploit"
-                                rules={[{required: true, message: 'Exploit can\'t be empty!'}]}
+                                name="scanType"
+                                label="Scan type"
+                                rules={[{required: true, message: 'Scan type can\'t be empty!'}]}
                             >
-                                <Select onChange={value => setNewCard({...newCard, exploit: value})}
-                                        placeholder="Please select an exploit">
+                                <Select onChange={value => setNewCard({...newCard, scanType: value})}
+                                        placeholder="Please select a scan type">
                                     <Option value="Ddos">Ddos</Option>
-                                    <Option value="sql injection">SQL Injection</Option>
+                                    <Option value="ftp attack">FTP Attack</Option>
                                     <Option value="ports scanning">Ports scanning</Option>
                                 </Select>
                             </Form.Item>
                         </Col>
                     </Row>
-                    {renderSwitch(newCard.exploit)}
+                    {renderSwitch(newCard.scanType, exploit, payload, setExploitForPenTest, setPayloadForPenTest)}
                     <Row gutter={16}>
                         <Col span={24}>
                             <Form.Item
@@ -217,7 +253,8 @@ const SideDrawer = (props) => {
 const mapStateToProps = (state) => {
     return {
         sideDrawerR: state.sideDrawerReducer,
-        userR: state.userReducer
+        userR: state.userReducer,
+        awsR: state.awsReducer
     };
 }
 
@@ -231,6 +268,12 @@ const mapDispatchToProps = (dispatch) => {
         },
         updateCard: (card) => {
             dispatch(updateCard(card))
+        },
+        addEc2: (ec2) => {
+            dispatch(addEC2(ec2))
+        },
+        removeEc2: (ec2) => {
+            dispatch(removeEC2(ec2));
         }
     };
 }

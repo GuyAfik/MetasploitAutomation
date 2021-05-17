@@ -15,7 +15,9 @@ const LoginPage = props => {
     const [isLoading, setIsLoading] = useState(false);
     const [userEmail, setUserEmail] = useState("");
     const [userPassword, setUserPassword] = useState("");
-
+    /**
+     * fires after "Login" button. fetch user from the server by the provided email and password
+     */
     const performLogin = () => {
         setIsLoading(true);
         if (userEmail === "" || userPassword === "") {

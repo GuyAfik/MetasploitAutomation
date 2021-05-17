@@ -8,7 +8,21 @@ import CustomCard from "../components/CustomCard";
 import {PlusOutlined} from '@ant-design/icons';
 import {openCardModal} from "../actions/modalsActions";
 import CardDetailsModal from "../components/CardDetailsModal";
+import {Page, Text, View, Document, StyleSheet} from '@react-pdf/renderer';
+import {addEC2} from "../actions/awsActions";
 
+// Create styles
+const styles = StyleSheet.create({
+    page: {
+        flexDirection: 'row',
+        backgroundColor: '#E4E4E4'
+    },
+    section: {
+        margin: 10,
+        padding: 10,
+        flexGrow: 1
+    }
+});
 const {Title} = Typography;
 
 const nonEmptyPage = (props) => {
@@ -40,6 +54,10 @@ const emptyPage = () => {
 
 
 const HomePage = (props) => {
+    useEffect(() => {
+        props.addEc2("i-0cc3a1a18dcf4bf0b")
+    }, []);
+
     return (
         <div style={{width: '100%', display: 'block'}}>
             <SideDrawer/>
@@ -63,7 +81,8 @@ const HomePage = (props) => {
 const mapStateToProps = (state) => {
     return {
         userR: state.userReducer,
-        sideDrawerR: state.sideDrawerReducer
+        sideDrawerR: state.sideDrawerReducer,
+        awsR: state.awsReducer
     };
 }
 
@@ -78,6 +97,9 @@ const mapDispatchToProps = (dispatch) => {
         openCardModal: (card) => {
             dispatch(openCardModal(card))
         },
+        addEc2: (ec2) => {
+            dispatch(addEC2(ec2))
+        }
     };
 }
 
