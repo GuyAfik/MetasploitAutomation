@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {Drawer, Form, Button, Col, Row, Input, Select, Result} from 'antd';
+import React, {useEffect, useRef, useState} from 'react';
+import {Drawer, Form, Button, Col, Row, Input, Select, Result, Typography} from 'antd';
 import {connect} from 'react-redux';
 import {closeSideDrawer} from "../actions/sideDrawerActions";
 import {addCard, updateCard} from "../actions/userActions";
@@ -9,12 +9,13 @@ import {addEC2, removeEC2} from "../actions/awsActions";
 import {EXPLOITS, PAYLOADS} from "../Utils/Constants";
 
 const {Option} = Select;
+const {Text} = Typography;
 
 const DdosFields = () => {
     return (null);
 }
 /**
- * ftp attack component in the side drawer. rendered only if the user chose FTP Attack from the scan type drop down.
+ * ftp attack component in the side drawer. rendered only if the user chose FTP Attack from the scan type drop down. presents options drop-downs that change according the user's selection.
  * @param exploit - name of the exploit
  * @param payload - name of the payload
  * @param setExploitForPenTest - set state method for the exploit
@@ -34,30 +35,21 @@ const FTPAttackFields = (exploit, payload, setExploitForPenTest, setPayloadForPe
 
     return (<Row gutter={16}>
         <Col span={12}>
-            <Form.Item
-                name="exploit"
-                label="Exploit"
-                rules={[{required: true, message: 'Exploit can\'t be empty!',}]}
-            >
-                <Select onChange={exploit => handleExploitChanged(exploit)} defaultValue={EXPLOITS[0]}>
-                    {EXPLOITS.map(exploit => {
-                        return <Option value={exploit}>{exploit}</Option>
-                    })}
-                </Select>
-            </Form.Item>
+            <Text>Exploit</Text>
+            <Select style={{width: '100%'}} defaultValue={EXPLOITS[0]}
+                    onChange={exploit => handleExploitChanged(exploit)}>
+                {EXPLOITS.map(exploit => {
+                    return <Option key={exploit}>{exploit}</Option>
+                })}
+            </Select>
         </Col>
         <Col span={12}>
-            <Form.Item
-                name="payload"
-                label="Payload"
-                rules={[{required: true, message: 'Payload can\'t be empty!',}]}
-            >
-                <Select onChange={payload => handlePayloadChanged(payload)} value={payload}>
-                    {exploit.map(payload => {
-                        return <Option value={payload}>{payload}</Option>
-                    })}
-                </Select>
-            </Form.Item>
+            <Text>Payload</Text>
+            <Select style={{width: '100%'}} onChange={payload => handlePayloadChanged(payload)} value={payload}>
+                {PAYLOADS[exploit].map(payload => {
+                    return <Option key={payload}>{payload}</Option>
+                })}
+            </Select>
         </Col>
     </Row>);
 }
@@ -92,13 +84,13 @@ const renderSwitch = (scanType, exploit, payload, setExploitForPenTest, setPaylo
  */
 const SideDrawer = (props) => {
     const [createFailed, setCreateFailed] = useState(false);
-    const [exploit, setExploit] = useState(PAYLOADS[EXPLOITS[0]]);
+    const [exploit, setExploit] = useState(EXPLOITS[0]);
     const [payload, setPayload] = useState(PAYLOADS[EXPLOITS[0]][0]);
     const [updateFailed, setUpdateFailed] = useState(false);
     const [loading, setLoading] = useState(false);
     const [newCard, setNewCard] = useState({
         startTime: "",
-        endTime: "",
+        endTime: "---",
         id: "",
         name: "",
         ip: "",
@@ -111,17 +103,19 @@ const SideDrawer = (props) => {
     const [form] = Form.useForm();
 
     /**
-     * Saves and creates new card only after the uid is set as state.
+     * Saves and creates new card(penTest) only after the uid is set as state.
+     * also triggers new Api Request handler to start the penTest flow.
      */
     useEffect(() => {
         if (newCard.id !== "") {
+            console.log(newCard);
             let user = props.userR;
             user = {...user, data: {cards: [...user.data.cards, newCard]}};
             updateUser(user.email, user).then(res => {
                 if (res.ok) {
                     props.addCard(newCard);
                     setLoading(false);
-                    let handler = new ApiRequestsHandler(props.updateCard, newCard, props.addEc2, props.removeEc2);
+                    let handler = new ApiRequestsHandler(props.updateCard, newCard, props.addEc2IdToStore, props.removeEc2FromStore);
                     handler.startTest();
                     handleOnClose();
                 } else {
@@ -131,6 +125,13 @@ const SideDrawer = (props) => {
             })
         }
     }, [newCard.id])
+
+    /**
+     * useEffect for updating the newCard's exploit and payload right after the user change them.
+     */
+    useEffect(() => {
+        setNewCard({...newCard, exploit: exploit, payload: payload});
+    }, [exploit, payload]);
 
     /**
      * triggers when the user close the side drawer. reset the pentest details
@@ -168,14 +169,13 @@ const SideDrawer = (props) => {
     }
 
     const setExploitForPenTest = (exploit) => {
-        setExploit(PAYLOADS[exploit]);
+        console.log(exploit);
+        setExploit(exploit);
         setPayload(PAYLOADS[exploit][0])
-        setNewCard({...newCard, exploit: exploit});
     }
 
     const setPayloadForPenTest = (payload) => {
         setPayload(payload)
-        setNewCard({...newCard, payload: payload});
     }
 
 
@@ -297,10 +297,10 @@ const mapDispatchToProps = (dispatch) => {
         updateCard: (card) => {
             dispatch(updateCard(card))
         },
-        addEc2: (ec2) => {
+        addEc2IdToStore: (ec2) => {
             dispatch(addEC2(ec2))
         },
-        removeEc2: (ec2) => {
+        removeEc2FromStore: (ec2) => {
             dispatch(removeEC2(ec2));
         }
     };

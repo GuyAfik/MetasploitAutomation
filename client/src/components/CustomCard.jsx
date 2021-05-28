@@ -18,7 +18,7 @@ const CustomCard = (props) => {
     const {details} = props;
 
     /**
-     * renders the scan description according to the status in different colors
+     * renders the scan description according to the status in different colors (Finished, Failed od Running)
      * @returns {JSX.Element}
      */
     const getStatusElement = () => {
@@ -74,7 +74,8 @@ const CustomCard = (props) => {
                     </Grid>
                 </Card.Content>
             </Card>
-        </Tooltip>);
+        </Tooltip>)
+        ;
 
 }
 

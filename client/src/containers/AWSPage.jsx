@@ -82,7 +82,7 @@ const AWSPage = (props) => {
             setIsLoading(false);
         }
         return (() => {
-            props.removeEc2("i-0686975845f04f50b");
+
         });
     }, []);
 

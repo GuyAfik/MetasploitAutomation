@@ -1,5 +1,5 @@
 import React from 'react';
-import {Modal} from "antd";
+import {Modal, Button} from "antd";
 import {closeCardModal} from "../actions/modalsActions";
 import {connect} from "react-redux";
 import ReactJson from 'react-json-view'
@@ -119,7 +119,8 @@ const CardDetailsModal = (props) => {
                 title="Report"
                 visible={props.modalsR.cardModal.isOpen}
                 onOk={() => props.closeCardModal()}
-                onCancel={() => props.closeCardModal()}
+                okText={'Close'}
+                cancelButtonProps={{disabled: true}}
                 width={1000}
             >
                 {card.status ? presentationReport(card) : null}

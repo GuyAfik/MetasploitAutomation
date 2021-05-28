@@ -159,33 +159,34 @@ export function scanPorts(target, instanceId) {
     })
 }
 
-export function dDosAttack() {
-    // return fetch(`/DockerServerInstances/${instanceId}/Metasploit/${target}/ScanOpenPorts`, {
-    //     method: 'GET'
-    // }).then(res => {
-    //     if (res.ok) {
-    //         return res
-    //     } else {
-    //         throw new Error();
-    //     }
-    // }).catch(err => {
-    //     throw new Error(err);
-    // })
-}
-
-export function ftpAttack(target, instanceId, exploit, payload) {
-    return fetch(`/DockerServerInstances/${instanceId}/Metasploit/${target}/RunExploit`, {
+export function dDosAttack(target, instanceId) {
+    return fetch(`/DockerServerInstances/${instanceId}/Metasploit/${target}/RunAuxiliary`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-            "name": exploit,
-            "payloads": {
-                payload: {}
-            },
+            "name": "dos/http/slowloris",
             "options": {
-                "RHOSTS": target
+                "rhost": target
             }
         })
+    }).then(res => {
+        if (res.ok) {
+            return res
+        } else {
+            throw new Error();
+        }
+    }).catch(err => {
+        throw new Error(err);
+    })
+}
+
+export function ftpAttack(target, instanceId, exploit, payload) {
+    let exploitJson = "{\"name\":\"" + exploit + "\", \"payloads\": {\"" + payload + "\": {}}, \"options\": {\"RHOST\": " + target + "}}";
+    console.log(JSON.parse(exploitJson));
+    return fetch(`/DockerServerInstances/${instanceId}/Metasploit/${target}/RunExploit`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: exploitJson
     }).then(res => {
         if (res.ok) {
             return res
