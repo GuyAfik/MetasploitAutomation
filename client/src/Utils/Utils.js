@@ -182,7 +182,6 @@ export function dDosAttack(target, instanceId) {
 
 export function ftpAttack(target, instanceId, exploit, payload) {
     let exploitJson = "{\"name\":\"" + exploit + "\", \"payloads\": {\"" + payload + "\": {}}, \"options\": {\"RHOST\": " + target + "}}";
-    console.log(JSON.parse(exploitJson));
     return fetch(`/DockerServerInstances/${instanceId}/Metasploit/${target}/RunExploit`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
