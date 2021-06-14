@@ -84,12 +84,19 @@ class ContainerOperations(DockerOperations):
 
         exit_code, output = container.exec_run(cmd=run_msfrpcd_cmd)
 
+        self.run_container(
+            image='tleemcjr/metasploitable2',
+            kwargs={"stdin_open": True, "tty": True, "detach": True}
+        )
+
         if not exit_code:
             return container
         else:
             raise ContainerCommandFailure(
                 error_code=exit_code, output=output, cmd=run_msfrpcd_cmd, container_id=container.id
             )
+
+
 
     @property
     def container(self):
