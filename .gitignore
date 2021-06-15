@@ -23,6 +23,7 @@ notes
 __pycache__/
 *.py[cod]
 *$py.class
+*.ptc
 
 # C extensions
 *.so

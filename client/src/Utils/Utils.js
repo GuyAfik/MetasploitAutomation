@@ -160,15 +160,17 @@ export function scanPorts(target, instanceId) {
 }
 
 export function dDosAttack(target, instanceId) {
+    let ddosObject = {
+        name: "dos/http/slowloris",
+        options: {
+            rhost: target
+        }
+    }
+    console.log(ddosObject);
     return fetch(`/DockerServerInstances/${instanceId}/Metasploit/${target}/RunAuxiliary`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-            "name": "dos/http/slowloris",
-            "options": {
-                "rhost": target
-            }
-        })
+        body: JSON.stringify(ddosObject)
     }).then(res => {
         if (res.ok) {
             return res
@@ -181,7 +183,8 @@ export function dDosAttack(target, instanceId) {
 }
 
 export function ftpAttack(target, instanceId, exploit, payload) {
-    let exploitJson = "{\"name\":\"" + exploit + "\", \"payloads\": {\"" + payload + "\": {}}, \"options\": {\"RHOST\": " + target + "}}";
+    let exploitJson = `{"name": "${exploit}", "payloads": {"${payload}": {}}, "options": {"RHOSTS": "${target}"}}`;
+    console.log(JSON.parse(exploitJson));
     return fetch(`/DockerServerInstances/${instanceId}/Metasploit/${target}/RunExploit`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -193,6 +196,7 @@ export function ftpAttack(target, instanceId, exploit, payload) {
             throw new Error();
         }
     }).catch(err => {
+        console.log(err)
         throw new Error(err);
     })
 }
