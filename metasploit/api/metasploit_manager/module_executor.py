@@ -254,10 +254,12 @@ class Exploit(MetasploitModule):
         for payload_name, payload_options in payloads.items():
             payload = self.build_module(name=payload_name, options=payload_options)
 
+            time.sleep(15)
+
             exploit_job = exploit.execute(payload=payload)
             job_id = exploit_job["job_id"]
 
-            time.sleep(20)
+            time.sleep(10)
 
             payload_details = self._collect_exploit_execution_result(
                 job_id=job_id, exploit_name=name, payload_name=payload_name
