@@ -40,22 +40,22 @@ class ApiRequestsHandler {
     /**
      * performs dDos attack. this method called just after all of the preparations are completed
      */
-    dDosAttack() {
-        this.updatePenTestStatus({state: "running", description: "Run dDos attack"});
-        dDosAttack(this._penTestCard.ip, this._instanceId).then(dDosAttackResult => {
+    dDosAttack(scope) {
+        scope.updatePenTestStatus({state: "running", description: "Run dDos attack"}, null, scope);
+        dDosAttack(scope._penTestCard.ip, scope._instanceId).then(dDosAttackResult => {
             dDosAttackResult.json().then(dDosAttackResult => {
-                this.updatePenTestStatus({
+                scope.updatePenTestStatus({
                     state: "Finished",
                     description: "Finished"
                 }, dDosAttackResult);
             })
         }).catch(() => {
-            this.updatePenTestStatus({
+            scope.updatePenTestStatus({
                 state: "Failed",
                 description: "Cannot run dDos Attack"
-            })
+            }, null, scope)
         }).finally(() => {
-            this.removeAWSInstance()
+            scope.removeAWSInstance()
         })
     }
 
@@ -63,22 +63,22 @@ class ApiRequestsHandler {
      * performs FTP attack. this method called just after all of the preparations are completed.
      * also updates the ui for test status
      */
-    FTPAttack() {
-        this.updatePenTestStatus({state: "running", description: "Run FTP attack"});
-        ftpAttack(this._penTestCard.ip, this._instanceId, this._penTestCard.exploit, this._penTestCard.payload).then(ftpAttackResult => {
+    FTPAttack(scope) {
+        scope.updatePenTestStatus({state: "running", description: "Run FTP attack"}, null, scope);
+        ftpAttack(scope._penTestCard.ip, scope._instanceId, scope._penTestCard.exploit, scope._penTestCard.payload).then(ftpAttackResult => {
             ftpAttackResult.json().then(ftpAttackResult => {
-                this.updatePenTestStatus({
+                scope.updatePenTestStatus({
                     state: "Finished",
                     description: "Finished"
                 }, ftpAttackResult);
             })
         }).catch(() => {
-            this.updatePenTestStatus({
+            scope.updatePenTestStatus({
                 state: "Failed",
                 description: "Cannot run FTP Attack"
-            })
+            }, null, scope)
         }).finally(() => {
-            this.removeAWSInstance()
+            scope.removeAWSInstance()
         })
     }
 
@@ -86,23 +86,23 @@ class ApiRequestsHandler {
      * performs port scan. this method called just after all of the preparations are completed.
      * also updates the ui for test status
      */
-    portScanning() {
-        this.updatePenTestStatus({state: "running", description: "Scanning"});
-        scanPorts(this._penTestCard.ip, this._instanceId).then(portScanResult => {
+    portScanning(scope) {
+        scope.updatePenTestStatus({state: "running", description: "Scanning"}, null, scope);
+        scanPorts(scope._penTestCard.ip, scope._instanceId).then(portScanResult => {
             portScanResult.json().then(portScanResult => {
-                this.updatePenTestStatus({
+                scope.updatePenTestStatus({
                     state: "Finished",
                     description: "Finished"
                 }, portScanResult);
                 console.log(portScanResult);
             });
         }).catch(() => {
-            this.updatePenTestStatus({
+            scope.updatePenTestStatus({
                 state: "Failed",
                 description: "Cannot run port scan"
-            })
+            }, null, scope)
         }).finally(() => {
-            this.removeAWSInstance()
+            scope.removeAWSInstance()
         })
     }
 
@@ -121,7 +121,7 @@ class ApiRequestsHandler {
                 this.updatePenTestStatus({state: "running", description: "Creating Metasploit Container"});
                 createMetasploitContainer(instance._id).then(container => {
                     container.json().then(container => {
-                        specificAttack();
+                        specificAttack(this);
                     });
                 }).catch(() => {
                     this.updatePenTestStatus({
@@ -149,7 +149,7 @@ class ApiRequestsHandler {
      "195.95.193.250:443"
      ]
      */
-    updatePenTestStatus(status, results = null) {
+    updatePenTestStatus(status, results = null, obj = null) {
         let penTest = this._penTestCard;
         penTest = {...penTest, status: status}
         if (status.state !== 'running') {
@@ -158,8 +158,14 @@ class ApiRequestsHandler {
         if (results !== null) {
             penTest = {...penTest, results: results};
         }
-        this._updateCard(penTest);
-        this._penTestCard = penTest;
+        if (obj == null) {
+            this._updateCard(penTest);
+            this._penTestCard = penTest;
+        } else {
+            obj._updateCard(penTest);
+            obj._penTestCard = penTest;
+        }
+
     }
 
     /**

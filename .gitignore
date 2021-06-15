@@ -10,8 +10,10 @@ client//coverage
 # production
 client//build
 client/package-lock.json
-static/
-templates/
+static
+templates
+static/react
+templates/index.html
 
 venv
 default_key_pair_name.pem
