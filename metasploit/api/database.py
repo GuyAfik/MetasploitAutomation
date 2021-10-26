@@ -1,4 +1,5 @@
 import os
+import ssl
 from pymongo import MongoClient
 
 from metasploit.api import constants as global_constants
@@ -11,9 +12,10 @@ from metasploit.api.errors import (
     DuplicateUserNameError,
     InvalidUserNameOrPassword
 )
+
 #  for local host
 db_client = MongoClient(
-    "mongodb+srv://Metasploit:FVDxbg312@metasploit.gdvxn.mongodb.net/metasploit?retryWrites=true&w=majority"
+    "mongodb+srv://Metasploit:FVDxbg312@metasploit.gdvxn.mongodb.net/metasploit?retryWrites=true&w=majority", ssl_cert_reqs=ssl.CERT_NONE
 )
 
 # db_client = MongoClient(os.environ.get("MONGO_DB"))
@@ -33,6 +35,7 @@ class DatabaseOperations(object):
     Attributes:
         collection_type (pymongo.Collection): the collection to use in the DB.
     """
+
     def __init__(self, collection_type):
         """
         Initialize the DatabaseOperations class attributes.

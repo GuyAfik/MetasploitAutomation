@@ -1,5 +1,6 @@
 from flask_restful import Api, request
 from flask import Flask
+import flask
 
 from metasploit.api.response import (
     ErrorResponse
@@ -16,9 +17,12 @@ from metasploit.api.logic.container_service import ContainerServiceImplementatio
 from metasploit.api.logic.metasploit_service import MetasploitServiceImplementation
 from metasploit.api.logic.user_service import UserServiceImplementation
 
+# front-end serving configuration. guy, if u touch i'll kill you!
+application = Flask(__name__, template_folder='../../../templates', static_folder='../../../static')
 
-application = Flask(__name__)
-
+@application.route("/")
+def index():
+    return flask.render_template("index.html")
 
 class FlaskAppWrapper(object):
     """
@@ -70,6 +74,7 @@ class FlaskAppWrapper(object):
             error_msg=err_msg, http_error_code=HttpCodes.BAD_REQUEST, req=request.json, path=request.base_url
         )()
 
+
     @application.errorhandler(HttpCodes.METHOD_NOT_ALLOWED)
     def method_not_allowed(self):
         """
@@ -116,6 +121,7 @@ class FlaskAppWrapper(object):
         """
         Add all the api endpoints
         """
+
         self._add_container_endpoints()
         self._add_docker_instance_endpoints()
         self._add_metasploit_endpoints()
@@ -126,6 +132,7 @@ class FlaskAppWrapper(object):
         Add all the endpoints that is related to docker server operations.
         """
         docker_server_controller_kwargs = {'docker_server_implementation': DockerServerServiceImplementation}
+
 
         self._api.add_resource(
             InstancesController,

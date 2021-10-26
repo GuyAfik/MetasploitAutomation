@@ -23,8 +23,8 @@ class AwsAccess(object):
     def __init__(self):
         # For amit's mac
         # os.environ['AWS_DEFAULT_REGION'] = 'us-west-2'
-        self._client = boto3.client(self.EC2, region_name='us-east-2')
-        self._resource = boto3.resource(self.EC2, region_name='us-east-2')
+        self._client = boto3.client(self.EC2, region_name='us-east-2', aws_access_key_id=os.environ.get("AWS_ACCESS_KEY"), aws_secret_access_key=os.environ.get("AWS_SECRET_KEY"))
+        self._resource = boto3.resource(self.EC2, region_name='us-east-2', aws_access_key_id=os.environ.get("AWS_ACCESS_KEY"), aws_secret_access_key=os.environ.get("AWS_SECRET_KEY"))
         self._session = boto3.Session()
 
     @property
